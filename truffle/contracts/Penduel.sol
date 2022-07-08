@@ -62,8 +62,7 @@ contract Penduel {
     }
 
     function createSession() payable public {
-        string memory _word = _words[2];
-        address creator = msg.sender;  
+      
     }
 
     function joinSession(uint256 idSession) payable public {
