@@ -20,7 +20,8 @@ contract(`Penduel`, function (accounts) {
   // constant des adresses pour les tests
   const admin = accounts[0];
   const player1 = accounts[1];
-  const palyer2 = accounts[2];
+  const player2 = accounts[2];
+  const notPlayer = accounts[8];
   const notadmin = accounts[9];
 
   // variable qui permet de numéroter nos tests 
