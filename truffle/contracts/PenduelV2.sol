@@ -13,8 +13,10 @@ pragma solidity 0.8.15;
 /// @dev This contract can cointains exploit, deploy this contract on tesnet only!!
 contract Penduel {
         
-    bytes32[] _words = [bytes32("hello"),bytes32("goodbye"),bytes32("sun"),bytes32("holliday"),bytes32("before"),bytes32("after"),bytes32("scpecial")];
-    bytes public mot = 'hello';
+    bytes32[] _words = [bytes32("hello"),bytes32("goodbye"),bytes32("sun"),
+                        bytes32("holliday"),bytes32("before"),bytes32("after"),
+                        bytes32("special")];    
+
     address payable public admin;
     uint256 internal fee;       
     uint256 public totalCreatedSessions;
@@ -33,13 +35,13 @@ contract Penduel {
         bytes32 word;
         StateSession  state;
         address mustPlay;
-        bytes32[] lettersPlayedPOne;
-        bytes32[] lettersPlayedPtwo;
+        bytes1[] lettersPlayedPOne;
+        bytes1[] lettersPlayedPtwo;
     }
    
 
     struct Players {
-        bytes32[] lettersPlayed;
+        bytes1[] lettersPlayed;
         uint256[] games; 
     }
 
@@ -166,12 +168,12 @@ contract Penduel {
         return (session[id].idSession, session[id].playerOne, session[id].playerTwo, session[id].betSize, session[id].word) ;
     }
 
-    function getStructPart(uint256 id) public view returns(StateSession  state, address mustPlay, bytes32[] memory lettersPlayedPOne, bytes32[] memory lettersPlayedPtwo){
+    function getStructPart(uint256 id) public view returns(StateSession  state, address mustPlay, bytes1[] memory lettersPlayedPOne, bytes1[] memory lettersPlayedPtwo){
         return (session[id].state, session[id].mustPlay, session[id].lettersPlayedPOne, session[id].lettersPlayedPtwo);
 
     }
     /// @notice
-    function play(bytes32 letter, uint256 idSession) public  onlyPlayer(idSession) {        
+    function play(bytes1 letter, uint256 idSession) public  onlyPlayer(idSession) {        
         
         require(isLetter(letter) == true, "Error, is not a letter"); 
         require(session[idSession].playerTwo != address(0x0), "Error, await for a second player");
