@@ -1,6 +1,6 @@
 // Tests pour le Smart contract Penduel.sol
 // import des SC
-const RatRaceNFT = artifacts.require(`./Penduel.sol`);
+const Penduel = artifacts.require(`./Penduel.sol`);
 
 // import chai/test-helpers
 const {
@@ -18,7 +18,7 @@ const { expect } = require(`chai`);
 contract(`Penduel`, function (accounts) {
 
   // constant des adresses pour les tests
-  const admin = accounts[0];
+  const owner = accounts[0];
   const player1 = accounts[1];
   const player2 = accounts[2];
   const notPlayer = accounts[8];
@@ -27,22 +27,44 @@ contract(`Penduel`, function (accounts) {
   // variable qui permet de numéroter nos tests 
   var testCounter = 0;   
 
+  const subcriptionId = 8023;
+
 
   // on déploie le contrat avant chaque test
   beforeEach(async function () {
-    this.PenduelInstance = await Penduel.new({from: owner});
+    this.PenduelInstance = await Penduel.new(subcriptionId, {
+      from: owner,
+    });
   });
 
 
   // on vérifie toutes les variables/constantes de notre contrat 
-//   context(`###### variable test ######`, () => {
-//     it(`${testCounter++}: max_supply must be equal to 3333`, async function () {
-//       const maxSupply = await this.PenduelInstance.max_supply();
-//       await expect(maxSupply).to.be.bignumber.equal(
-//         `3333`,
-//         `max_supply is not 3333`
-//       );
-//     });
+  context(`###### variable test ######`, () => {
+    it(`${testCounter++}: s_subscriptionId must be equal to 8023`, async function () {
+      const subcriptionId = await this.PenduelInstance.s_subscriptionId();
+      await expect(subcriptionId).to.be.bignumber.equal(
+        `8023`,
+        `s_subscriptionId is not 8023`
+      );
+    });
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  }); 
+
+
+
+
+
+}); 
 
 //     it(`${testCounter++}: giftLimit must be equal to 33`, async function () {
 //       const maxSupply = await this.PenduelInstance.giftLimit();
@@ -67,4 +89,3 @@ contract(`Penduel`, function (accounts) {
 //         `max_qty_mint_allowed is not 6`
 //       );
 //     });
-})
