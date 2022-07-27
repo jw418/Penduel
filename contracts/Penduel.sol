@@ -3,8 +3,8 @@
 pragma solidity 0.8.15;
 
 // import "../../node_modules/@openzeppelin/contracts/access/Ownable.sol";
-import "../../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "../../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
 /// @title Penduel
 /// @author jw418
@@ -16,7 +16,7 @@ contract Penduel is VRFConsumerBaseV2 {
     // Your subscription ID for CHAINLINK.
     uint64 public s_subscriptionId;   //8023
     // Rinkeby coordinator   
-    address vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;
+    address vrfCoordinator;
     bytes32 s_keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; 
     uint32 callbackGasLimit = 100000;
     // The default is 3, but you can set this higher.
@@ -83,8 +83,8 @@ contract Penduel is VRFConsumerBaseV2 {
     event DiceRolled(uint256 indexed requestId, uint256 indexed idSession);
     event DiceLanded(uint256 indexed requestId);
 
-    constructor(uint64 subscriptionId) VRFConsumerBaseV2(vrfCoordinator) {    
-        COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
+    constructor(uint64 subscriptionId, address _vrfCoordinator) VRFConsumerBaseV2(vrfCoordinator) {    
+        COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
         admin = payable(msg.sender);
         s_subscriptionId = subscriptionId;
     }

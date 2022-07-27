@@ -1,16 +1,10 @@
 // Tests pour le Smart contract Penduel.sol
 // import des SC
-const Penduel = artifacts.require(`./Penduel.sol`);
+const Penduel = artifacts.require(`Penduel`);
+const VRFCoordinatorV2Mock = artifacts.require('VRFCoordinatorV2Mock');
 
 // import chai/test-helpers
-const {
-  BN,
-  expectRevert,
-  expectEvent,
-  balance,
-  send,
-  ether,
-} = require(`@openzeppelin/test-helpers`);
+const { BN, expectRevert, expectEvent, balance, send, ether,} = require(`@openzeppelin/test-helpers`);
 const { expect } = require(`chai`);
 
 
@@ -28,23 +22,23 @@ contract(`Penduel`, function (accounts) {
   var testCounter = 0;   
 
   const subcriptionId = 8023;
+  const subcriptionIdMock = 1;
 
 
   // on déploie le contrat avant chaque test
   beforeEach(async function () {
-    this.PenduelInstance = await Penduel.new(subcriptionId, {
-      from: owner,
-    });
+    this.vrfCoordinatorV2Mock = await VRFCoordinatorV2Mock.new(1000000, 1000000);
+    this.PenduelInstance = await Penduel.new(1, '0x6168499c0cFfCaCD319c818142124B7A15E857ab');
   });
 
 
   // on vérifie toutes les variables/constantes de notre contrat 
   context(`###### variable test ######`, () => {
-    it(`${testCounter++}: s_subscriptionId must be equal to 8023`, async function () {
+    it(`${testCounter++}: s_subscriptionId must be equal to 1`, async function () {
       const subcriptionId = await this.PenduelInstance.s_subscriptionId();
       await expect(subcriptionId).to.be.bignumber.equal(
-        `8023`,
-        `s_subscriptionId is not 8023`
+        `1`,
+        `s_subscriptionId is not 1`
       );
     });
 
