@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-
 import "../../node_modules/@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol";
+
 
 // // A mock for testing code that relies on VRFCoordinatorV2.
 // pragma solidity ^0.8.4;
 
-// import "../../node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+
+//import "../../node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 // import "../../node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol";
-// import "../../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+//  import "/../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+//  import "/../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
 
 // contract VRFCoordinatorV2Mock is VRFCoordinatorV2Interface {
@@ -319,4 +321,4 @@ import "../../node_modules/@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2M
 //   function pendingRequestExists(uint64 subId) public view override returns (bool) {
 //     revert("not implemented");
 //   }
-// }
+//}
