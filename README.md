@@ -10,8 +10,8 @@ j'ai continué à faire des changements sur le SC (version non déployée).
 
 j'ai essayer longuement de faire les test en local avec les faux contrats vrf v2 coordinator de chainlink mais sans succès. j'ai donc repris de zéro avec une version du contart sans chainlink 
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureTests.PNG)
+![](https://github.com/jw418/Penduel/blob/main/CaptureTests.PNG)
 
 
 le front est en local et n'est pas terminé. qq fonctions utilisable
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureFront.PNG)
+![](https://github.com/jw418/Penduel/blob/main/CaptureFront.PNG)
