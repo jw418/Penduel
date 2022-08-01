@@ -1,40 +1,11 @@
-# React Truffle Box
+## Exercice non terminé
 
-This box comes with everything you need to start using Truffle to write, compile, test, and deploy smart contracts, and interact with them from a React app.
+# Penduel
 
-## Installation
+adresse du contrat : 0x863ea5817e237c1fc8be22b42f0d642fc7a1685c  (rinkeby)
 
-First ensure you are in an empty directory.
+j'ai continué à faire des changements sur le SC (version non déployée).
 
-Run the `unbox` command using 1 of 2 ways.
+j'ai essayer longuement de faire les test en local avec les faux contrats vrf v2 coordinator de chainlink mais sans succès. j'ai donc repris de zéro avec une version du contart sans chainlink 
 
-```sh
-# Install Truffle globally and run `truffle unbox`
-$ npm install -g truffle
-$ truffle unbox react
-```
-
-```sh
-# Alternatively, run `truffle unbox` via npx
-$ npx truffle unbox react
-```
-
-Start the react dev server.
-
-```sh
-$ cd client
-$ npm start
-  Starting the development server...
-```
-
-From there, follow the instructions on the hosted React app. It will walk you through using Truffle and Ganache to deploy the `SimpleStorage` contract, making calls to it, and sending transactions to change the contract's state.
-
-## FAQ
-
-- __How do I use this with Ganache (or any other network)?__
-
-  The Truffle project is set to deploy to Ganache by default. If you'd like to change this, it's as easy as modifying the Truffle config file! Check out [our documentation on adding network configurations](https://trufflesuite.com/docs/truffle/reference/configuration/#networks). From there, you can run `truffle migrate` pointed to another network, restart the React dev server, and see the change take place.
-
-- __Where can I find more resources?__
-
-  This Box is a sweet combo of [Truffle](https://trufflesuite.com) and [Create React App](https://create-react-app.dev). Either one would be a great place to start!
+le front est en local et pas terminé.
