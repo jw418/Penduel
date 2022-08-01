@@ -5,7 +5,6 @@ import Form from 'react-bootstrap/Form';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Table from 'react-bootstrap/Table';
-// import Penduel from "./contracts/Penduel.json";
 import Penduel from "./contracts/Penduel.json";
 import getWeb3 from "./getWeb3";
 import "./App.css";
@@ -44,18 +43,18 @@ class App extends Component {
 
   // les states qui doivent etre actualisé
   runInit = async() => {
-    const { contract } = this.state;    
-
+    const { contract, accounts } = this.state;    
+    
 
     // récupérer la listes des parties du joueur connecté
-     const playerGames = await contract.methods.getPlayerGames().call();
+     const playerGames = await contract.methods.getPlayerGames(accounts[0]).call();
     // Mettre à jour le state 
      this.setState({ playerGames: playerGames });
 
     // récupérer la liste des parties joignable
-    const reachableSessions = await contract.methods.getReachableSessions().call();
+    //const reachableSessions = await contract.methods.getReachableSessions().call();
     // Mettre à jour le state  
-    this.setState({ reachableSessions: reachableSessions });
+    //this.setState({ reachableSessions: reachableSessions });
   }
   
   runGetwinner = async() => {
@@ -81,10 +80,11 @@ class App extends Component {
   }
 
   createSession = async() => {
-    const { accounts, contract} = this.state;
-    const inputValue = this.address.value;
-    await contract.methods.createSession().send({from: accounts[0], value: inputValue });
-  }
+    const { accounts, contract} = this.state; 
+    const bet = this.bet.value;
+    await contract.methods.createSession().send({from: accounts[0], value: bet }); 
+    this.runInit();
+    }
   
   joinSession = async() => {
     const { accounts, contract} = this.state;
@@ -95,8 +95,9 @@ class App extends Component {
 
   play = async() => {
     const { accounts, contract} = this.state;
-    const idSession = this.address.value;
+    
     const letter = this.address.value;
+    const idSession = this.address.value;
     await contract.methods.play(letter, idSession).send({from: accounts[0]});
   }
 
@@ -174,8 +175,20 @@ class App extends Component {
                 <ListGroup.Item>
                   <Table striped bordered hover>                  
                     <tbody>
+                      
                       {playerGames !== null && 
-                        playerGames.map((b) => <tr><td>{b}</td></tr>)
+                        playerGames.map((b) => 
+                        
+                        <tr><td>
+                          <br></br>
+                          {b}
+                          <Form.Group controlID="playSession">
+                          <Form.Control type="text" id="letter" placeholder="type here your lowercase letter"
+                          ref={(input) => { this.letter = input }}
+                        />
+                        
+                        <br></br>
+                      </Form.Group><Button onClick={this.play } variant="dark" > Play </Button></td></tr>)
                       }
                     </tbody>
                   </Table>
@@ -189,15 +202,15 @@ class App extends Component {
 
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <Card style={{ width: '50rem' }}>
-            <Card.Header><strong>Create Session</strong></Card.Header>
+            <Card.Header><strong>Create new Session ++</strong></Card.Header>
             <Card.Body>
-              <Form.Group controlId="createSession">
-                <Form.Control type="text" id="uintVote" placeholder="amount"
-                ref={(input) => { this.createSession = input }}
+              <Form.Group controlID="createSession">
+                <Form.Control type="number" id="betSize" placeholder="Bet Size amount in wei"
+                ref={(input) => { this.bet = input }}
                 />
               </Form.Group>
               <br></br>
-              <Button onClick={ this.votefor } variant="dark" > Create </Button>
+              <Button onClick={ this.createSession } variant="dark" > Create </Button>
             </Card.Body>
           </Card>
           </div>

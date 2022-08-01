@@ -1,12 +1,22 @@
-const Penduel = artifacts.require("Penduel");
+
+const MockPenduel = artifacts.require("MockPenduel");
 
 module.exports = async function (deployer) {
-  let vrfSubscriptionId = 8023;
-  await deployer.deploy(
-    Penduel,
-    vrfSubscriptionId,                
-);
+
+  await deployer.deploy(MockPenduel);
 };
+
+
+// const Penduel = artifacts.require("Penduel");
+
+// module.exports = async function (deployer) {
+//   let vrfSubscriptionId = 8023;
+//   await deployer.deploy(
+//     Penduel,
+//     vrfSubscriptionId,                
+// );
+// };
+
 
 
 // const VRFCoordinatorV2Mock = artifacts.require('VRFCoordinatorV2Mock');
@@ -30,24 +40,27 @@ module.exports = async function (deployer) {
 
 // module.exports = async function (deployer) {
  
-//   let vrfCoordinatorAddress, vrfKeyHash, vrfSubscriptionId, priceFeedAddress;
+//   let vrfCoordinatorAddress, vrfSubscriptionId, priceFeedAddress;
 
 //   if (config.network === 'development') {
 //       // deploy mocks if network is development     
 //       await deployMocks(deployer);
 //       vrfCoordinatorAddress = VRFCoordinatorV2Mock.address;
-//       vrfKeyHash = '0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc';
+     
 //       vrfSubscriptionId = 1; // mock vrf coordinator creates a subscription with id of 1 at first creation      
 //       priceFeedAddress = MockV3Aggregator.address;
       
 //   } else {
-//     // change values depends on your network (rinkeby, kovan etc.)    
+//     // change values depends on your network (rinkeby, kovan etc.) 
+//     vrfCoordinatorAddress = '0x6168499c0cFfCaCD319c818142124B7A15E857ab';        // Rinkeby coordinator  
 //     vrfSubscriptionId = 8023;   
 //   }
 
 //   await deployer.deploy(
 //       Penduel,
-//       vrfSubscriptionId,                
+//       vrfCoordinatorAddress,
+//       vrfSubscriptionId,   
+//       priceFeedAddress,             
 //   );
-// };
+//};
 

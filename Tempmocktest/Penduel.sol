@@ -2,8 +2,9 @@
 
 pragma solidity 0.8.15;
 
-import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
 
 /// @title Penduel
@@ -16,12 +17,14 @@ contract Penduel is VRFConsumerBaseV2{
     /* Chainlink's VRF V2  variables */
     bool joinSessionFctOpen;
     uint16 requestConfirmations = 3;        // The default is 3, but you can set this higher.
-    uint32 callbackGasLimit = 200000;
+    uint32 callbackGasLimit = 100000;
     uint32 numWords =  1;                   // Number of random number at each request.
-    uint64 s_subscriptionId;                // Your subscription ID for CHAINLINK   // 8023  
+    uint64  public s_subscriptionId;                // Your subscription ID for CHAINLINK   // 8023  
     uint256[] public s_randomWords;         // For the FullFill Fct                   
-    address vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;        // Rinkeby coordinator  
-    bytes32 s_keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;  
+    address vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;   // Rinkeby coordinator 30 gwei Key Hash
+    bytes32 s_keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; // 30 gwei Key Hash
+    AggregatorV3Interface ethUsdPriceFeed;
+      
 
     
     uint timeOut = 24 hours;     
@@ -33,6 +36,7 @@ contract Penduel is VRFConsumerBaseV2{
     uint256 public totalCreatedSessions;
       
     address payable public admin; 
+    Sessions[] games;
 
     /* Mapping*/
     mapping(uint256 => uint256) private reqId;                  //  associate a request with a game session
@@ -96,8 +100,10 @@ contract Penduel is VRFConsumerBaseV2{
     event RNGRequested(uint256 indexed requestId, uint256 indexed idSession);
     event RNGFound(uint256 indexed requestId);
 
+    event RandomWordsTaken(uint256[] randomWords);
 
-    /* Constructor*/
+
+  /* Constructor*/
     /// @dev go to your chainlink account to see your subcription ID 
     /// @dev when the contract is deployed do not forget to add this contract to your consumer
     constructor(uint64 subscriptionId) VRFConsumerBaseV2(vrfCoordinator) {    
@@ -210,7 +216,8 @@ contract Penduel is VRFConsumerBaseV2{
         uint256 value = randomWords[0] % _words.length;
         session[reqId[requestId]].word = _words[value]; 
         // emitting event to signal rng was founded
-        emit RNGFound(requestId);        
+        emit RNGFound(requestId);
+        emit RandomWordsTaken(randomWords);        
         joinSessionFctOpen = true;
 
         // here we remplaced the first letter     
@@ -341,8 +348,12 @@ contract Penduel is VRFConsumerBaseV2{
       return s_randomWords;
     }
 
-    // function getReachableSession() public view returns(ReachableSession[] memory){
+    // // function getReachableSession() public view returns(ReachableSession[] memory){
      
+    // // }
+    // function getSessionsReachable() public  view returns(bool pOneFoundWord, bool ptwoWin,uint256 idSession , address payable playerOne, address payable playerTwo, uint256 betSize, bytes32 word){
+        
+    //     return (session[id].playerOneFoundWord, session[id].playerTwoFoundWord, session[id].idSession, session[id].playerOne, session[id].playerTwo, session[id].betSize, session[id].word);
     // }
 
     function getStructPartOne(uint256 id) public  view returns(bool pOneFoundWord, bool ptwoWin,uint256 idSession , address payable playerOne, address payable playerTwo, uint256 betSize, bytes32 word){
