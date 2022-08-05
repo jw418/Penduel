@@ -11,7 +11,7 @@ import "./App.css";
 
 class App extends Component {
   // state = { web3: null, accounts: null, contract: null, arrayproposal: null, whitelist: null};
-  state = { web3: null, accounts: null, contract: null, playerGames: null, reachableSessions: null, playerGuess:null, victory:null, balance:null, mustPlay:null};
+  state = { web3: null, accounts: null, contract: null, playerGames: null, arrayGames: null, reachableSessions: null, playerOneGuess:null,playerTwoGuess:null, victory:null, balance:null, mustPlay:null};
   componentWillMount = async () => {
     try {
       // Récupérer le provider web3
@@ -47,28 +47,40 @@ class App extends Component {
     
 
     // récupérer la listes des parties du joueur connecté
-     const playerGamesIDs = await contract.methods.getPlayerGames(accounts[0]).call();
-    // Mettre à jour le state 
-     const playerGames = playerGamesIDs.map((el) =>  {
-       console.log(el);
-       contract.methods.sessionPublic(el).call();
-     })
-    const test = await contract.methods.sessionPublic(1).call();
-    console.log(test.betSize);
+    const playerGames = await contract.methods.getPlayerGames(accounts[0]).call();
+     console.log(playerGames) 
+     console.log(playerGames.length) 
     this.setState({ playerGames: playerGames });
-    //console.log(playerGames[0])
-    //console.log(playerGames);
-   
-    //let gamerSessions = await contract.methods.session(1).call();
-    //console.log(gamerSessions);
+
+    // const firstGame = await contract.methods.sessionPublic(playerGames[0]).call();
+    // console.log(firstGame);
+    // console.log(firstGame.mustPlay);
 
 
-    // récupérer la liste des parties joignable
-    //const reachableSessions = await contract.methods.getReachableSessions().call();
-    // Mettre à jour le state  
-    //this.setState({ reachableSessions: reachableSessions });
-
+    const arrayGames = [];
+    async function loopGames() {
+      for(let i = 0;i < playerGames.length; i++) {
+        let toPush = await contract.methods.sessionPublic(playerGames[i]).call()
+        arrayGames.push(toPush);
+        // console.log(String(game.mustplay));
+        // console.log(String(game.wordLegth));
+        // console.log(String(game.betSize));
+        // console.log(String(game.playerOneGuess));
+        // console.log(String(game.playerTwoGuess));
+        // console.log(String(game.state));
+        // console.log(String(game.playerOne));
+        // console.log(String(game.playerTwo));       
+      }       
+    }
     
+    loopGames();
+    console.log(arrayGames);
+    console.log(String(arrayGames));
+    console.log(Array.isArray(arrayGames));
+    this.setState({arrayGames:arrayGames});
+    console.log(arrayGames);
+    
+
 
   }
   
@@ -161,7 +173,7 @@ class App extends Component {
 
   render() {
     // on recupere les state 
-    const {playerGames, reachableSessions, gameID } = this.state;
+    const {arrayGames,playerGames, reachableSessions, gameID } = this.state;
 
     // pour visualiser l'uint ID des propositions
 
@@ -183,15 +195,15 @@ class App extends Component {
             <Card.Body>
               <ListGroup variant="flush">
                 <ListGroup.Item>
-                  <Table striped bordered hover>                  
-                    <tbody>
-                  
+                  <Table striped bordered hover>
+                                      
+                    <tbody>                  
                       {playerGames !== null && 
                         playerGames.map((b) => 
                         
                         <tr><td>
                           <br></br>
-                          {b}
+                          ID:{b.betSize} // Bet Size: eth // status: // Player One: //Player Two: // Must Play:
                         
 
                           <Form.Group controlID="playSession">
@@ -200,7 +212,7 @@ class App extends Component {
                         />
                         
                         <br></br>
-                      </Form.Group><Button onClick={this.play } variant="dark" > Play </Button></td></tr>)
+                      </Form.Group><Button onClick={this.play} variant="dark" > Play </Button></td></tr>)
                       }
                     </tbody>
                   </Table>
