@@ -54,7 +54,7 @@ class App extends Component {
        contract.methods.sessionPublic(el).call();
      })
     const test = await contract.methods.sessionPublic(1).call();
-    console.log(test);
+    console.log(test.betSize);
     this.setState({ playerGames: playerGames });
     //console.log(playerGames[0])
     //console.log(playerGames);
