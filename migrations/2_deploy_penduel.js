@@ -1,22 +1,23 @@
 
-const MockPenduel = artifacts.require("MockPenduel");
+
+const Penduel = artifacts.require("Penduel");
 
 module.exports = async function (deployer) {
-
-  await deployer.deploy(MockPenduel);
+  let vrfSubscriptionId = 8023;
+  await deployer.deploy(
+    Penduel,
+    vrfSubscriptionId,                
+);
 };
 
+// const MockPenduel = artifacts.require("MockPenduel");
 
-// const Penduel = artifacts.require("Penduel");
+
 
 // module.exports = async function (deployer) {
-//   let vrfSubscriptionId = 8023;
-//   await deployer.deploy(
-//     Penduel,
-//     vrfSubscriptionId,                
-// );
-// };
 
+//   await deployer.deploy(MockPenduel);
+// };
 
 
 // const VRFCoordinatorV2Mock = artifacts.require('VRFCoordinatorV2Mock');

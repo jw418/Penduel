@@ -11,7 +11,7 @@ import "./App.css";
 
 class App extends Component {
   // state = { web3: null, accounts: null, contract: null, arrayproposal: null, whitelist: null};
-  state = { web3: null, accounts: null, contract: null, inputValue: null, inputID: null, playerGames: null, reachableSessions: null};
+  state = { web3: null, accounts: null, contract: null, playerGames: null, reachableSessions: null, playerGuess:null, victory:null, balance:null, mustPlay:null};
   componentWillMount = async () => {
     try {
       // Récupérer le provider web3
@@ -47,14 +47,29 @@ class App extends Component {
     
 
     // récupérer la listes des parties du joueur connecté
-     const playerGames = await contract.methods.getPlayerGames(accounts[0]).call();
+     const playerGamesIDs = await contract.methods.getPlayerGames(accounts[0]).call();
     // Mettre à jour le state 
-     this.setState({ playerGames: playerGames });
+     const playerGames = playerGamesIDs.map((el) =>  {
+       console.log(el);
+       contract.methods.sessionPublic(el).call();
+     })
+    const test = await contract.methods.sessionPublic(1).call();
+    console.log(test);
+    this.setState({ playerGames: playerGames });
+    //console.log(playerGames[0])
+    //console.log(playerGames);
+   
+    //let gamerSessions = await contract.methods.session(1).call();
+    //console.log(gamerSessions);
+
 
     // récupérer la liste des parties joignable
     //const reachableSessions = await contract.methods.getReachableSessions().call();
     // Mettre à jour le state  
     //this.setState({ reachableSessions: reachableSessions });
+
+    
+
   }
   
   runGetwinner = async() => {
@@ -65,12 +80,7 @@ class App extends Component {
     this.setState({ winnerid : winnerid });
   }; 
 
-  whitelist = async() => {
-    const { accounts, contract} = this.state;
-    const address = this.address.value;
-    await contract.methods.isWhitelisted(address).send({from: accounts[0]});
-    this.runInit();  
-  }
+
   //###########################
   //################ simple fct
   openJoinSessionFct = async() => {
@@ -175,13 +185,15 @@ class App extends Component {
                 <ListGroup.Item>
                   <Table striped bordered hover>                  
                     <tbody>
-                      
+                  
                       {playerGames !== null && 
                         playerGames.map((b) => 
                         
                         <tr><td>
                           <br></br>
                           {b}
+                        
+
                           <Form.Group controlID="playSession">
                           <Form.Control type="text" id="letter" placeholder="type here your lowercase letter"
                           ref={(input) => { this.letter = input }}
