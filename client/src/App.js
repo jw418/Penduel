@@ -60,29 +60,26 @@ class App extends Component {
     const arrayGames = [];
     async function loopGames() {
       for(let i = 0;i < playerGames.length; i++) {
-        let toPush = await contract.methods.sessionPublic(playerGames[i]).call()
+        let game = await contract.methods.sessionPublic(playerGames[i]).call();
+        let toPush = [
+        String(game.mustplay),
+        String(game.wordLegth),
+        String(game.betSize),
+        String(game.playerOneGuess),
+        String(game.playerTwoGuess),
+        String(game.state),
+        String(game.playerOne),
+        String(game.playerTwo)]       
         arrayGames.push(toPush);
-        // console.log(String(game.mustplay));
-        // console.log(String(game.wordLegth));
-        // console.log(String(game.betSize));
-        // console.log(String(game.playerOneGuess));
-        // console.log(String(game.playerTwoGuess));
-        // console.log(String(game.state));
-        // console.log(String(game.playerOne));
-        // console.log(String(game.playerTwo));       
       }       
     }
     
     loopGames();
-    console.log(arrayGames);
-    console.log(String(arrayGames));
-    console.log(Array.isArray(arrayGames));
-    this.setState({arrayGames:arrayGames});
-    console.log(arrayGames);
+    console.log(arrayGames);    
     
-
-
+    this.setState({arrayGames:arrayGames})
   }
+
   
   runGetwinner = async() => {
     const { contract } = this.state;
@@ -198,12 +195,12 @@ class App extends Component {
                   <Table striped bordered hover>
                                       
                     <tbody>                  
-                      {playerGames !== null && 
-                        playerGames.map((b) => 
+                      {arrayGames !== null && 
+                        arrayGames.map((b) => 
                         
                         <tr><td>
                           <br></br>
-                          ID:{b.betSize} // Bet Size: eth // status: // Player One: //Player Two: // Must Play:
+                          ID:{b[0]} // Bet Size: eth // status: // Player One: //Player Two: // Must Play:
                         
 
                           <Form.Group controlID="playSession">
