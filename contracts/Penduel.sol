@@ -1,6 +1,6 @@
 /// SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.15;
+pragma solidity 0.8.16;
 
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
@@ -38,6 +38,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
 
     /* Mapping*/
     mapping(uint256 => uint256) private reqId;                  //  associate a request with a game session
+    mapping(uint256 => uint256) private reqIdPublic; 
     mapping(uint256 => Sessions) private session;               //  mapping an uint(idSession) with a session 
     mapping(uint256 => SessionPublic) public sessionPublic;  
     mapping(address => uint256) public balance;                 //  gamers balances
@@ -189,7 +190,8 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             callbackGasLimit,
             numWords
         );
-        reqId[requestId] = session[idSession].idSession;         // here we mapping request id with a session       
+        reqId[requestId] = session[idSession].idSession;                // here we mapping request id with a session
+        reqIdPublic[requestId] = sessionPublic[idSession].idSession;    // same here with the public part for the front-end 
         emit RNGRequested(requestId, idSession);
         session[idSession].rngRequestDate = block.timestamp;        
         sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
@@ -203,7 +205,8 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     /// @notice this function is call by the vrf coordinator and permit to attribute a rng word to the session
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal  override{
         uint256 value = randomWords[0] % _words.length;
-        session[reqId[requestId]].word = _words[value]; 
+        session[reqId[requestId]].word = _words[value];
+        sessionPublic[reqIdPublic[requestId]].wordLegth = getSessionWordLength(session[reqId[requestId]].idSession); 
         // emitting event to signal rng was founded
         emit RNGFound(requestId);
         emit RandomWordsTaken(randomWords);        
@@ -215,7 +218,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             session[reqId[requestId]].firstLetterRemplaced = true;
         }
         session[reqId[requestId]].lastMoveDate = block.timestamp;   // start timeout counter
-        sessionPublic[reqId[requestId]].state = StateSession.InProgress;  // rng was founded so we can open the session       
+        sessionPublic[reqIdPublic[requestId]].state = StateSession.InProgress;  // rng was founded so we can open the session       
     }    
 
     /// @param idSession uint256 for identify the session
@@ -309,7 +312,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
 
     /// @param idSession uint256 for identify the sesFsion
     /// @notice get the word legth for a given session
-    function getSessionWordLength(uint256 idSession) external view returns (uint8){
+    function getSessionWordLength(uint256 idSession) private view returns (uint8){
         require(sessionPublic[idSession].state == StateSession.InProgress || sessionPublic[idSession].state == StateSession.Finished, "Error, This session does not have already a word");
         uint8 i = 0;
         while(i < 32 && session[idSession].word[i] != 0) {

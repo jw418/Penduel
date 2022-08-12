@@ -10,8 +10,8 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 
 class App extends Component {
-  // state = { web3: null, accounts: null, contract: null, arrayproposal: null, whitelist: null};
-  state = { web3: null, accounts: null, contract: null, playerGames: null, arrayGames: null, reachableSessions: null, playerOneGuess:null,playerTwoGuess:null, victory:null, balance:null, mustPlay:null};
+  
+  state = { web3: null, accounts: null, contract: null, playerGames: null, arrayGames: null, reachebleGames: null, playerOneGuess:null,playerTwoGuess:null, victory:null, balance:null, mustPlay:null};
   componentWillMount = async () => {
     try {
       // Récupérer le provider web3
@@ -48,36 +48,52 @@ class App extends Component {
 
     // récupérer la listes des parties du joueur connecté
     const playerGames = await contract.methods.getPlayerGames(accounts[0]).call();
-     console.log(playerGames) 
-     console.log(playerGames.length) 
     this.setState({ playerGames: playerGames });
-
-    // const firstGame = await contract.methods.sessionPublic(playerGames[0]).call();
-    // console.log(firstGame);
-    // console.log(firstGame.mustPlay);
-
 
     const arrayGames = [];
     async function loopGames() {
       for(let i = 0;i < playerGames.length; i++) {
-        let game = await contract.methods.sessionPublic(playerGames[i]).call();
-        let toPush = [
-        String(game.mustplay),
-        String(game.wordLegth),
-        String(game.betSize),
-        String(game.playerOneGuess),
-        String(game.playerTwoGuess),
-        String(game.state),
-        String(game.playerOne),
-        String(game.playerTwo)]       
-        arrayGames.push(toPush);
-      }       
-    }
-    
-    loopGames();
-    console.log(arrayGames);    
-    
-    this.setState({arrayGames:arrayGames})
+        const game = await contract.methods.sessionPublic(playerGames[i]).call();
+        console.log(game)
+        const rowArray = Object.entries(game);
+        console.log(rowArray);
+        const arrayGame = rowArray.splice(9,rowArray.length);
+        //if (arrayGame[8][1]== 1){
+        //  const arrayToPush = arrayGame[4].concat(arrayGame[5],arrayGame[0])
+        //  arrayGames.push(arrayToPush);
+        //} else {
+        console.log(arrayGame);      
+        arrayGames.push(arrayGame);
+       // }
+      }    
+      
+    }    
+    await loopGames();  
+    this.setState({arrayGames:arrayGames});
+
+    const reachebleGames = [];
+    async function loopReachableGames() {
+      const totalCreatedGames = await contract.methods.totalCreatedSessions().call();
+      console.log(String(totalCreatedGames));
+      for(let i = 0;i < totalCreatedGames; i++) {
+        const game = await contract.methods.sessionPublic(i).call();      
+        const rowArray = Object.entries(game);             
+        const arrayInfoGame = rowArray.splice(9,rowArray.length);
+        if (arrayInfoGame[8][1]== 1){
+          const arrayToPush = arrayInfoGame[4].concat(arrayInfoGame[5],arrayInfoGame[0])
+          reachebleGames.push(arrayToPush);
+        } 
+        console.log(arrayInfoGame[8][1]);
+        console.log(arrayInfoGame[4]);
+        console.log(arrayInfoGame[5]);   
+        console.log(arrayInfoGame[0]);             
+        
+      }    
+      
+    }    
+    await loopReachableGames();  
+    console.log(reachebleGames);
+    this.setState({reachebleGames:reachebleGames});
   }
 
   
@@ -105,11 +121,9 @@ class App extends Component {
     this.runInit();
     }
   
-  joinSession = async() => {
-    const { accounts, contract} = this.state;
-    const idSession = this.address.value;
-    const inputValue = this.address.value;
-    await contract.methods.joinSession(idSession).send({from: accounts[0], value: inputValue });
+  joinSession = async(id,bet) => {
+    const { accounts, contract} = this.state;       
+    await contract.methods.joinSession(id).send({from: accounts[0], value: bet });
   }
 
   play = async() => {
@@ -120,57 +134,10 @@ class App extends Component {
     await contract.methods.play(letter, idSession).send({from: accounts[0]});
   }
 
-//   getarray = async() => {
-//     const { accounts, contract} = this.state;
-//     const proposal = this.proposal.value;
-   
-//     await contract.methods.depositProposal(proposal).send({from: accounts[0]});
-//     // Récupérer la liste des comptes autorisés
-//     this.runInit();
-//   }
-
-//   endproposal = async() => {
-//     const { accounts, contract} = this.state;    
-//     await contract.methods.endProposalRegistration().send({from: accounts[0]});
-    
-//   }
-
-//   startvote = async() => {
-//     const { accounts, contract} = this.state;    
-//     await contract.methods.startVotingSession().send({from: accounts[0]});
-    
-//   }
-
-//   votefor = async() => {
-//     const { accounts, contract} = this.state;  
-//     const vote = this.vote.value;  
-//     await contract.methods.voteFor(vote).send({from: accounts[0]});
-//     this.runInit();
-//   }
-
-//   stopvote = async() => {
-//     const { accounts, contract} = this.state;    
-//     await contract.methods.endVotingSession().send({from: accounts[0]});
-//   }
-
-//   countedtailes = async() => {
-//     const { accounts, contract} = this.state;
-//     await contract.methods.countedVotes().send({from: accounts[0]});
-//     this.runInit();
-//     this.runGetwinner();
-//   }
-    
-
-//   winnerid = async() => {
-//     const {contract} = this.state;
-//     await contract.methods.getWinner().call();
-//     this.runInit();
-//   }
- 
 
   render() {
     // on recupere les state 
-    const {arrayGames,playerGames, reachableSessions, gameID } = this.state;
+    const {arrayGames, reachebleGames, gameID } = this.state;
 
     // pour visualiser l'uint ID des propositions
 
@@ -192,24 +159,37 @@ class App extends Component {
             <Card.Body>
               <ListGroup variant="flush">
                 <ListGroup.Item>
-                  <Table striped bordered hover>
-                                      
+                  <Table striped bordered hover>                                 
+                          <script>console.log(arrayGames);</script> 
                     <tbody>                  
                       {arrayGames !== null && 
                         arrayGames.map((b) => 
                         
                         <tr><td>
                           <br></br>
-                          ID:{b[0]} // Bet Size: eth // status: // Player One: //Player Two: // Must Play:
-                        
-
+                          {b[4][0]}: {b[4][1]}
+                          <br></br>
+                          {b[0][0]}: {b[0][1]}
+                          <br></br>
+                          {b[1][0]}: {b[1][1]}
+                          <br></br>
+                          {b[2][0]}: {b[2][1]}                         
+                          <br></br>
+                          {b[5][0]}: {b[5][1]} wei
+                          <br></br>
+                          {b[6][0]}: {b[6][1]}
+                          <br></br>    
+                          {b[7][0]}: {b[7][1]}
+                          <br></br>
+                          {b[8][0]}: {b[8][1]}
+                          <br></br>                                                                            
                           <Form.Group controlID="playSession">
                           <Form.Control type="text" id="letter" placeholder="type here your lowercase letter"
                           ref={(input) => { this.letter = input }}
-                        />
+                          />
                         
                         <br></br>
-                      </Form.Group><Button onClick={this.play} variant="dark" > Play </Button></td></tr>)
+                        </Form.Group><Button onClick={this.play} variant="dark" > Play </Button></td></tr>)
                       }
                     </tbody>
                   </Table>
@@ -251,8 +231,17 @@ class App extends Component {
                       </tr>
                     </thead>
                     <tbody>
-                      {reachableSessions !== null && 
-                        reachableSessions.map((a) => <tr><td>#: {gameID} / {a[0]} / {a[1]}</td></tr>)
+                      {reachebleGames !== null && 
+                        reachebleGames.map((a) => <><tr><td>
+                          
+                          Game ID: {a[1]}  Bet Size: {a[3]} wei Created By: {a[5]}
+                          <br></br>
+                          <br></br>
+                          <Button onClick={this.joinSession(a[1],a[3])} variant="dark" > join </Button>
+                          </td></tr>
+                          <br></br>
+                          </>                        
+                        )
                       }                     
                     </tbody>
                   </Table>

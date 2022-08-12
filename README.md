@@ -3,6 +3,7 @@
 # Penduel
 
 adresse du contrat : 0x863ea5817e237c1fc8be22b42f0d642fc7a1685c  (rinkeby)
+update: 0x72a5e69A25AD13E8311e0d5E58D7a0856E6c18Fd
 le SC déployée est fonctionel on peut créer, rejoindre et jouer des parties.
 
 
