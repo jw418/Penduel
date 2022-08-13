@@ -15,16 +15,16 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     VRFCoordinatorV2Interface COORDINATOR;
 
     /* Chainlink's VRF V2  variables */
-    bool joinSessionFctOpen;
+    
     uint16 requestConfirmations = 3;        // The default is 3, but you can set this higher.
-    uint32 callbackGasLimit = 100000;
+    uint32 callbackGasLimit = 200000;       
     uint32 numWords =  1;                   // Number of random number at each request.
     uint64  public s_subscriptionId;                // Your subscription ID for CHAINLINK   // 8023  
     uint256[] public s_randomWords;         // For the FullFill Fct                   
     address vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;   // Rinkeby coordinator 30 gwei Key Hash
     bytes32 s_keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; // 30 gwei Key Hash
      
-    
+    bool public joinSessionFctOpen;
     uint256 public totalCreatedSessions;
     uint timeOut = 24 hours;     
     bytes32[] _words = [
@@ -64,7 +64,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         uint256 betSize;
         bytes32 playerOneGuess;
         bytes32 playerTwoGuess;
-        StateSession  state;
+        StateSession  state;        
     }
 
     struct Player{
@@ -165,9 +165,6 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         sessionPublic[totalCreatedSessions].playerOne = payable(msg.sender);
         sessionPublic[totalCreatedSessions].betSize = msg.value;        
         sessionPublic[totalCreatedSessions].state = StateSession.Reachable;
-        // reachableSession[totalCreatedSessions].idSession = totalCreatedSessions;
-        // reachableSession[totalCreatedSessions].betSize = msg.value;
-        // reachableSession[totalCreatedSessions].playerOne = msg.sender;
 
         emit SessionCreated(totalCreatedSessions, msg.sender, msg.value);
     }
@@ -182,6 +179,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         require(sessionPublic[idSession].state == StateSession.Reachable, 'Error, session unreachable');     
         
         sessionPublic[idSession].playerTwo = payable(msg.sender);
+        sessionPublic[idSession].state = StateSession.InProgress;
         joinSessionFctOpen = false;
         requestId = COORDINATOR.requestRandomWords(
             s_keyHash,
@@ -191,7 +189,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             numWords
         );
         reqId[requestId] = session[idSession].idSession;                // here we mapping request id with a session
-        reqIdPublic[requestId] = sessionPublic[idSession].idSession;    // same here with the public part for the front-end 
+        reqIdPublic[requestId] = session[idSession].idSession;    // same here with the public part for the front-end 
         emit RNGRequested(requestId, idSession);
         session[idSession].rngRequestDate = block.timestamp;        
         sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
@@ -205,8 +203,8 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     /// @notice this function is call by the vrf coordinator and permit to attribute a rng word to the session
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal  override{
         uint256 value = randomWords[0] % _words.length;
-        session[reqId[requestId]].word = _words[value];
-        sessionPublic[reqIdPublic[requestId]].wordLegth = getSessionWordLength(session[reqId[requestId]].idSession); 
+        session[reqId[requestId]].word = _words[value];        
+        sessionPublic[reqIdPublic[requestId]].wordLegth = getSessionWordLength(reqId[requestId]); 
         // emitting event to signal rng was founded
         emit RNGFound(requestId);
         emit RandomWordsTaken(randomWords);        
@@ -218,7 +216,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             session[reqId[requestId]].firstLetterRemplaced = true;
         }
         session[reqId[requestId]].lastMoveDate = block.timestamp;   // start timeout counter
-        sessionPublic[reqIdPublic[requestId]].state = StateSession.InProgress;  // rng was founded so we can open the session       
+          // rng was founded so we can open the session       
     }    
 
     /// @param idSession uint256 for identify the session
