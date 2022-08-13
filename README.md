@@ -5,7 +5,7 @@
 adresse du contrat : 0x863ea5817e237c1fc8be22b42f0d642fc7a1685c (rinkeby)
 #################################################### 
 update
-Nouvelle adresse du contract: 0xa07f713AB13d836F25D6801b93677f69F12580F4 (rinkeby)
+Nouvelle adresse du contract: 0x4aAa00CF05385eF512E8bAE15dd504F085fF5177 (rinkeby)
 #####################################################
 
 le SC déployée est fonctionel on peut créer, rejoindre et jouer des parties.

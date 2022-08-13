@@ -48,6 +48,7 @@ class App extends Component {
 
     // récupérer la listes des parties du joueur connecté
     const playerGames = await contract.methods.getPlayerGames(accounts[0]).call();
+    console.log(playerGames);
     this.setState({ playerGames: playerGames });
 
     const arrayGames = [];
@@ -137,7 +138,7 @@ class App extends Component {
 
   render() {
     // on recupere les state 
-    const {arrayGames, reachebleGames, gameID } = this.state;
+    const {arrayGames, reachebleGames, accounts,gameID } = this.state;
 
     // pour visualiser l'uint ID des propositions
 
@@ -149,6 +150,9 @@ class App extends Component {
       <div className="App">
         <div>
             <h2 className="text-center">Penduel</h2>
+           
+            <p className="text-right">connected account: {accounts}</p>
+            <h1></h1>
             <hr></hr>
             <br></br>
         </div>        

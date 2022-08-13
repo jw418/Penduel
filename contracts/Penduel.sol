@@ -193,7 +193,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         emit RNGRequested(requestId, idSession);
         session[idSession].rngRequestDate = block.timestamp;        
         sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
-        playerGames[msg.sender].games.push(totalCreatedSessions);
+        playerGames[msg.sender].games.push(idSession);
         emit SessionJoined(idSession, msg.sender);
     }
 
