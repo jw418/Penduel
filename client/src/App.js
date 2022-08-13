@@ -76,7 +76,7 @@ class App extends Component {
     async function loopReachableGames() {
       const totalCreatedGames = await contract.methods.totalCreatedSessions().call();
       console.log(String(totalCreatedGames));
-      for(let i = 0;i < totalCreatedGames; i++) {
+      for(let i = 0;i <= totalCreatedGames; i++) {
         const game = await contract.methods.sessionPublic(i).call();      
         const rowArray = Object.entries(game);             
         const arrayInfoGame = rowArray.splice(9,rowArray.length);
@@ -87,10 +87,8 @@ class App extends Component {
         console.log(arrayInfoGame[8][1]);
         console.log(arrayInfoGame[4]);
         console.log(arrayInfoGame[5]);   
-        console.log(arrayInfoGame[0]);             
-        
-      }    
-      
+        console.log(arrayInfoGame[0]);                   
+      }       
     }    
     await loopReachableGames();  
     console.log(reachebleGames);
