@@ -11,7 +11,7 @@ import "./App.css";
 
 class App extends Component {
   
-  state = { web3: null, accounts: null, contract: null, playerGames: null, arrayGames: null, reachebleGames: null, playerOneGuess:null,playerTwoGuess:null, victory:null, balance:null, mustPlay:null};
+  state = { web3: null, accounts: null, contract: null, playerGames: null, arrayGames: null, reachebleGames: null, playerOneGuess:null,playerTwoGuess:null, victory:null, balance:null, inGameBalance: null, mustPlay:null};
   componentWillMount = async () => {
     try {
       // Récupérer le provider web3
@@ -43,7 +43,16 @@ class App extends Component {
 
   // les states qui doivent etre actualisé
   runInit = async() => {
-    const { contract, accounts } = this.state;    
+    const { contract, accounts } = this.state;  
+    
+    // const web3 = await getWeb3();
+    // const balance = await web3.eth.accounts.getBalance(accounts[0]);
+    // console.log(balance);
+    // this.setState({balance: balance});
+
+    const inGameBalance = await contract.methods.balance(accounts[0]).call();
+    console.log(inGameBalance);
+    this.setState({ inGameBalance: inGameBalance });
     
 
     // récupérer la listes des parties du joueur connecté
@@ -53,7 +62,7 @@ class App extends Component {
 
     const arrayGames = [];
     async function loopGames() {
-      for(let i = 0;i < playerGames.length; i++) {
+      for(let i = 0; i < playerGames.length; i++) {
         const game = await contract.methods.sessionPublic(playerGames[i]).call();
         console.log(game)
         const rowArray = Object.entries(game);
@@ -96,15 +105,7 @@ class App extends Component {
   }
 
   
-  runGetwinner = async() => {
-    const { contract } = this.state;
-    // récupérer la liste des comptes autorisés
-    const winnerid = await contract.methods.getWinner().call();
-    // Mettre à jour le state 
-    this.setState({ winnerid : winnerid });
-  }; 
-
-
+  
   //###########################
   //################ simple fct
   openJoinSessionFct = async() => {
@@ -125,18 +126,28 @@ class App extends Component {
     await contract.methods.joinSession(id).send({from: accounts[0], value: bet });
   }
 
-  play = async() => {
-    const { accounts, contract} = this.state;
+  withdraw = async() => {
+    const { accounts, contract} = this.state;       
+    await contract.methods.playerWithdraw().send({from: accounts[0]});
+  }
+
+  play = async(id) => {
+    const { accounts, contract, web3} = this.state;
     
-    const letter = this.address.value;
-    const idSession = this.address.value;
-    await contract.methods.play(letter, idSession).send({from: accounts[0]});
+    const zeroX = this.letter.value;
+    console.log(zeroX);
+    const letter = web3.utils.utf8ToHex(zeroX);
+    console.log(letter);
+    console.log(typeof letter);    
+    
+    await contract.methods.play(letter, id).send({from: accounts[0]});
+    this.runInit();
   }
 
 
   render() {
     // on recupere les state 
-    const {arrayGames, reachebleGames, accounts,gameID } = this.state;
+    const {arrayGames, reachebleGames, accounts, inGameBalance } = this.state;
 
     // pour visualiser l'uint ID des propositions
 
@@ -149,7 +160,7 @@ class App extends Component {
         <div>
             <h2 className="text-center">Penduel</h2>
            
-            <p className="text-right">connected account: {accounts}</p>
+            <p className="text-center">connected account: {accounts}</p>
             <h1></h1>
             <hr></hr>
             <br></br>
@@ -178,20 +189,22 @@ class App extends Component {
                           {b[2][0]}: {b[2][1]}                         
                           <br></br>
                           {b[5][0]}: {b[5][1]} wei
+                          <br></br>                              
+                          {b[3][0]}: {b[3][1]}
                           <br></br>
-                          {b[6][0]}: {b[6][1]}
+                          {b[6][0]}: {b[6][1]}                          
                           <br></br>    
                           {b[7][0]}: {b[7][1]}
                           <br></br>
                           {b[8][0]}: {b[8][1]}
                           <br></br>                                                                            
-                          <Form.Group controlID="playSession">
-                          <Form.Control type="text" id="letter" placeholder="type here your lowercase letter"
+                          <Form.Group controlID="letter">
+                          <Form.Control type="text" id="bytes1" placeholder="type here your lowercase letter"
                           ref={(input) => { this.letter = input }}
                           />
                         
                         <br></br>
-                        </Form.Group><Button onClick={this.play} variant="dark" > Play </Button></td></tr>)
+                        </Form.Group><Button onClick={() =>{this.play(b[4][1])}} variant="dark" > Play </Button></td></tr>)
                       }
                     </tbody>
                   </Table>
@@ -205,7 +218,7 @@ class App extends Component {
 
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <Card style={{ width: '50rem' }}>
-            <Card.Header><strong>Create new Session ++</strong></Card.Header>
+            <Card.Header><strong>Create New Game</strong></Card.Header>
             <Card.Body>
               <Form.Group controlID="createSession">
                 <Form.Control type="number" id="betSize" placeholder="Bet Size amount in wei"
@@ -239,7 +252,7 @@ class App extends Component {
                           Game ID: {a[1]}  Bet Size: {a[3]} wei Created By: {a[5]}
                           <br></br>
                           <br></br>
-                          <Button onClick={this.joinSession(a[1],a[3])} variant="dark" > join </Button>
+                          <Button onClick={() => {this.joinSession(a[1],a[3])}} variant="dark" > join </Button>
                           </td></tr>
                           <br></br>
                           </>                        
@@ -280,9 +293,9 @@ class App extends Component {
 
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <Card style={{ width: '50rem' }}>
-            <Card.Header><strong>withdraw</strong></Card.Header>
+            <Card.Header><strong>In-Game Balance: {inGameBalance} wei</strong></Card.Header>
             <Card.Body>          
-              <Button onClick={ this.playerWithdraw } variant="dark" > withdraw </Button>
+              <Button onClick={ this.withdraw } variant="dark" > withdraw </Button>
             </Card.Body>
           </Card>
           </div>
