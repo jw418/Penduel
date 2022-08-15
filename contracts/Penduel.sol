@@ -117,7 +117,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     /// @notice if chainlink took too many times for given a rng the player can ask for a refund 
     function refundRNGnotFound(uint256 idSession) external {
         require(msg.sender == sessionPublic[idSession].playerOne || msg.sender == sessionPublic[idSession].playerTwo, "Error, Not your session");
-        require(session[idSession].word[0] != "","Error, RNG word already found");
+        require(session[idSession].word[0] == "","Error, RNG word already found"); // edit change "!=" to "==" not already compiled and deployed
         require(block.timestamp > (session[idSession].rngRequestDate + 3 hours), "Error, TimeOut Not Reached");        
         sessionPublic[idSession].state = StateSession.Finished;
         balance[sessionPublic[idSession].playerOne] += sessionPublic[idSession].betSize;

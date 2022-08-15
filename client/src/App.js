@@ -102,12 +102,8 @@ class App extends Component {
     await loopReachableGames();  
     console.log(reachebleGames);
     this.setState({reachebleGames:reachebleGames});
-  }
-
+  }  
   
-  
-  //###########################
-  //################ simple fct
   openJoinSessionFct = async() => {
     const { accounts, contract} = this.state; 
       
@@ -144,6 +140,26 @@ class App extends Component {
     this.runInit();
   }
 
+  addWord = async() => {
+    const { accounts, contract, web3} = this.state;
+
+    const string = this.string.value;
+    console.log(string);
+    const word = web3.utils.utf8ToHex(string);
+    console.log(word);
+    console.log(typeof word);
+    await contract.methods.addWord(word).send({from: accounts[0]});
+  }
+
+  rngNotFound = async(id) => {
+    const { accounts, contract} = this.state;
+    await contract.methods.refundRNGnotFound(id).send({from: accounts[0]});
+  }
+  requestWinTimeout = async(id) => {
+    const { accounts, contract} = this.state;
+    await contract.methods.requestWinTimeout(id).send({from: accounts[0]});
+  }
+
 
   render() {
     // on recupere les state 
@@ -158,53 +174,68 @@ class App extends Component {
     return (
       <div className="App">
         <div>
-            <h2 className="text-center">Penduel</h2>
-           
-            <p className="text-center">connected account: {accounts}</p>
-            <h1></h1>
-            <hr></hr>
+            <h2 className="text-center">Penduel</h2>           
+            <p className="text-center">connected account: {accounts}</p>                     
             <br></br>
         </div>        
 
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <Card style={{ width: '50rem' }}>
             <Card.Header><strong>Your sessions</strong></Card.Header>
-            <Card.Body>
-              <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <Table striped bordered hover>                                 
-                          <script>console.log(arrayGames);</script> 
+              <Card.Body>
+                <ListGroup variant="flush">
+                  <ListGroup.Item>
+                    <Table striped bordered hover>                          
                     <tbody>                  
                       {arrayGames !== null && 
-                        arrayGames.map((b) => 
-                        
-                        <tr><td>
-                          <br></br>
-                          {b[4][0]}: {b[4][1]}
-                          <br></br>
-                          {b[0][0]}: {b[0][1]}
-                          <br></br>
-                          {b[1][0]}: {b[1][1]}
-                          <br></br>
-                          {b[2][0]}: {b[2][1]}                         
-                          <br></br>
-                          {b[5][0]}: {b[5][1]} wei
-                          <br></br>                              
-                          {b[3][0]}: {b[3][1]}
-                          <br></br>
-                          {b[6][0]}: {b[6][1]}                          
-                          <br></br>    
-                          {b[7][0]}: {b[7][1]}
-                          <br></br>
-                          {b[8][0]}: {b[8][1]}
-                          <br></br>                                                                            
-                          <Form.Group controlID="letter">
-                          <Form.Control type="text" id="bytes1" placeholder="type here your lowercase letter"
-                          ref={(input) => { this.letter = input }}
-                          />
-                        
-                        <br></br>
-                        </Form.Group><Button onClick={() =>{this.play(b[4][1])}} variant="dark" > Play </Button></td></tr>)
+                        arrayGames.map((b) =>                        
+                          <tr><td>
+                            <br></br>
+                              {b[4][0]}: {b[4][1]}
+                            <br></br>
+                              {b[0][0]}: {b[0][1]}
+                            <br></br>
+                              {b[1][0]}: {b[1][1]}
+                            <br></br>
+                              {b[2][0]}: {b[2][1]}                         
+                            <br></br>
+                              {b[5][0]}: {b[5][1]} wei
+                            <br></br>                              
+                              {b[3][0]}: {b[3][1]}
+                            <br></br>
+                              {b[6][0]}: {b[6][1]}                          
+                            <br></br>    
+                              {b[7][0]}: {b[7][1]}
+                            <br></br>
+                              {b[8][0]}: {b[8][1]}
+                            <br></br>                                                                            
+                            <Form.Group controlID="letter">
+                              <Form.Control type="text" id="bytes1" placeholder="type here your lowercase letter"
+                                ref={(input) => { this.letter = input }}
+                              />                        
+                              <br></br>
+                            </Form.Group>
+                            <Button onClick={() =>{this.play(b[4][1])}} variant="dark" > Play </Button>
+                          
+                            <div style={{display: 'flex', justifyContent: 'center'}}>
+                              <Card style={{ width: '20rem' }}>
+                              <Card.Header><strong>Refunding: Request RNG Time Out</strong></Card.Header>
+                                  <Card.Body>          
+                                    <Button onClick={() => this.rngNotFound(b[4][1])} variant="dark" > Request </Button>
+                                  </Card.Body>
+                                </Card>
+                            </div>
+
+                            <div  align='center' style={{display: 'flex', justifyContent: 'center'}}>
+                              <Card style={{ width: '20rem' }}>
+                              <Card.Header><strong>Request Victory: Oppent TimeOut</strong></Card.Header>                        
+                                <Card.Body>
+                                  <Button onClick={() =>  this.requestWinTimeout(b[4][1])} variant="dark" > Request </Button>          
+                                </Card.Body>
+                              </Card>
+                            </div>
+                          </td></tr>
+                        )
                       }
                     </tbody>
                   </Table>
@@ -278,11 +309,11 @@ class App extends Component {
             <Form.Group controlId="createSession">
                 <br></br>
                 <Form.Control type="text" id="uintVote" placeholder="word"
-                ref={(input) => { this.addWord= input }}
+                ref={(input) => { this.string= input }}              
                 />
               </Form.Group>
               <br></br>
-              <Button onClick={ this.addWord} variant="dark" > Add Word </Button>             
+              <Button onClick={ this.addWord } variant="dark" > Add Word </Button>             
               <br></br>
             </Card.Body>
           </Card>
