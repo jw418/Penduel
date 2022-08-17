@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import {useRef} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -11,7 +12,7 @@ import "./App.css";
 
 class App extends Component {
   
-  state = { web3: null, accounts: null, contract: null, playerGames: null, arrayGames: null, reachebleGames: null, playerOneGuess:null,playerTwoGuess:null, victory:null, balance:null, inGameBalance: null, mustPlay:null};
+  state = { web3: null, accounts: null, contract: null, playerGames: null, arrayGames: null, reachebleGames: null, inGameBalance: null};
   componentWillMount = async () => {
     try {
       // Récupérer le provider web3
@@ -43,66 +44,218 @@ class App extends Component {
 
   // les states qui doivent etre actualisé
   runInit = async() => {
-    const { contract, accounts } = this.state;  
-    
-    // const web3 = await getWeb3();
-    // const balance = await web3.eth.accounts.getBalance(accounts[0]);
-    // console.log(balance);
-    // this.setState({balance: balance});
+    const { contract, accounts, web3 } = this.state;   
 
-    const inGameBalance = await contract.methods.balance(accounts[0]).call();
-    console.log(inGameBalance);
-    this.setState({ inGameBalance: inGameBalance });
-    
+    const inGameBalance = await contract.methods.balance(accounts[0]).call();    
+    this.setState({ inGameBalance: inGameBalance });    
 
     // récupérer la listes des parties du joueur connecté
-    const playerGames = await contract.methods.getPlayerGames(accounts[0]).call();
-    console.log(playerGames);
+    const playerGames = await contract.methods.getPlayerGames(accounts[0]).call();    
     this.setState({ playerGames: playerGames });
 
-    const arrayGames = [];
-    async function loopGames() {
-      for(let i = 0; i < playerGames.length; i++) {
-        const game = await contract.methods.sessionPublic(playerGames[i]).call();
-        console.log(game)
-        const rowArray = Object.entries(game);
-        console.log(rowArray);
-        const arrayGame = rowArray.splice(9,rowArray.length);
-        //if (arrayGame[8][1]== 1){
-        //  const arrayToPush = arrayGame[4].concat(arrayGame[5],arrayGame[0])
-        //  arrayGames.push(arrayToPush);
-        //} else {
-        console.log(arrayGame);      
-        arrayGames.push(arrayGame);
-       // }
-      }    
+    const rngNotFound = async(id) => {
+      const { accounts, contract} = this.state;
+      await contract.methods.refundRNGnotFound(id).send({from: accounts[0]});
+    }
+
+    // a modifié pour que l'input soit dans le scop
+    let letters;
+    const play = async(id) => {
+      const { accounts, contract, web3} = this.state;          
+      console.log(letters);
       
-    }    
-    await loopGames();  
+      console.log(typeof letters);      
+      const letter = web3.utils.utf8ToHex(letters);
+      console.log(letter);
+      console.log(typeof letter);    
+      
+      await contract.methods.play(letter, id).send({from: accounts[0]});
+      this.runInit();
+    }
+
+    const requestWinTimeout = async(id) => {
+      const { accounts, contract} = this.state;
+      await contract.methods.requestWinTimeout(id).send({from: accounts[0]});
+    }
+  
+    // initialisation de l'array qui contient les infos des differentes parties de l'utilisateurs
+    const arrayGames = [];
+    
+    // function qui lis et oragnise les données
+    async function loopGames() {
+
+      // on parcours l'essemble des sessions du joueur
+      for(let i = 0; i < playerGames.length; i++) {
+
+        const game = await contract.methods.sessionPublic(playerGames[i]).call();     
+        const rowArray = Object.values(game);        
+        const rawArrayGame = rowArray.splice(9,rowArray.length);
+
+        const pOne = rawArrayGame[0];       
+        const pTwo = rawArrayGame[1];       
+        const mustPlay = rawArrayGame[2];       
+        const wordLength = rawArrayGame[3];       
+        const id = rawArrayGame[4];       
+        const betSize = rawArrayGame[5];       
+        const rawPOneGuess = rawArrayGame[6];       
+        const rawPTwoGuess = rawArrayGame[7];       
+        const status = rawArrayGame[8];
+
+        let opponent;
+        let playerTurn;
+        let userGuess;
+        
+        // création du rendu selon l'etat de la partie
+        // si la partie est joigable
+        if(status == 1) {
+        
+          let toRender =
+          <>                       
+            <p>Game ID: {id}  Bet Size: {betSize} Wei Created By: You</p>
+            <p>Await for a Second Player</p>
+          </>;        
+          arrayGames.push([id, toRender]);
+         
+        // si la partie est en cours  
+        }else if(status == 2) {
+          
+          if(pOne == accounts[0]) {
+            opponent = pTwo;
+            userGuess = rawPOneGuess;
+          }else{
+            opponent= pOne;
+            userGuess = rawPTwoGuess;
+          }
+
+          if(mustPlay == accounts[0]) {
+            playerTurn = 'Your Turn'
+          }else{
+            playerTurn = 'Opponent Turn'
+          }
+
+
+          // ici on convertie le mot du joueur de bytes32 à utf8 
+          let hexString = userGuess.slice(2, 2 + (wordLength*2));          
+          let guessString="";
+          for (let j=0; j< hexString.length; j= j+2){
+            
+            if (hexString[j]+ hexString[j+1]== "00"){
+              
+              guessString = guessString + "_";
+            
+            }else{
+
+              let toConvert = `0x${hexString[j]}${hexString[j+1]}00000000000000000000000000000000000000000000000000000000000000`;             
+              guessString = guessString + web3.utils.hexToUtf8(toConvert); 
+
+            }
+          }
+          
+          let toRender=
+            <>                       
+            <p>Game ID: {id}  Bet Size: {betSize} Wei  Opponent: {opponent}</p>
+            <p>{playerTurn}</p>
+            <h2>{guessString}</h2>
+            <p>Game: In Progress</p>
+          
+            <Form.Group controlID="letters">
+              <Form.Control type="text" id="bytes1" placeholder="type here your lowercase letter"
+                                ref={(input) => { letters = input }}
+                              />                        
+            </Form.Group>
+            <br></br>
+            <Button onClick={() =>{play(id)}} variant="dark" > Play </Button>
+                         
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+              <Card style={{ width: '20rem' }}>
+                <Card.Header><strong>Refunding: Request RNG Time Out</strong></Card.Header>
+                  <Card.Body>                          
+                    <Button onClick={() => rngNotFound(id)} variant="dark" > Request </Button>
+                  </Card.Body>
+              </Card>
+            </div>
+
+            <div  align='center' style={{display: 'flex', justifyContent: 'center'}}>
+              <Card style={{ width: '20rem' }}>
+                <Card.Header><strong>Request Victory: Oppent TimeOut</strong></Card.Header>                        
+                  <Card.Body>
+                    <Button onClick={() =>  requestWinTimeout(id)} variant="dark" > Request </Button>          
+                  </Card.Body>
+               </Card>
+            </div>    
+                             
+          </>;
+
+        arrayGames.push([id, toRender]);
+        
+        }else if (status == 3){
+          
+          if(pOne == accounts[0]) {
+            opponent = pTwo;
+            userGuess = rawPOneGuess;
+          }else{
+            opponent= pOne;
+            userGuess = rawPTwoGuess;
+          }          
+          
+          let hexString = userGuess.slice(2, 2 + (wordLength*2));          
+          let guessString="";
+          for (let j =0; j< hexString.length; j= j+2){
+            
+            if (hexString[j]+ hexString[j+1]== "00"){
+             
+              guessString = guessString + "_";
+             
+            }else{
+             
+              let toConvert = `0x${hexString[j]}${hexString[j+1]}00000000000000000000000000000000000000000000000000000000000000`;             
+              guessString = guessString + web3.utils.hexToUtf8(toConvert);
+              
+            }
+          }
+                  
+          let toRender=
+          <>                       
+            <p>Game ID: {id}  Bet Size: {betSize} Wei  Opponent: {opponent}</p>            
+            <h2>{guessString}</h2>
+            <p>Game: Finshed </p>
+          </>;
+
+          arrayGames.push([id, toRender]);
+        
+        }       
+      }        
+    }
+    await loopGames();    
     this.setState({arrayGames:arrayGames});
 
     const reachebleGames = [];
     async function loopReachableGames() {
+
       const totalCreatedGames = await contract.methods.totalCreatedSessions().call();
-      console.log(String(totalCreatedGames));
+      
       for(let i = 0;i <= totalCreatedGames; i++) {
         const game = await contract.methods.sessionPublic(i).call();      
         const rowArray = Object.entries(game);             
         const arrayInfoGame = rowArray.splice(9,rowArray.length);
+
         if (arrayInfoGame[8][1]== 1){
+
           const arrayToPush = arrayInfoGame[4].concat(arrayInfoGame[5],arrayInfoGame[0])
           reachebleGames.push(arrayToPush);
-        } 
-        console.log(arrayInfoGame[8][1]);
-        console.log(arrayInfoGame[4]);
-        console.log(arrayInfoGame[5]);   
-        console.log(arrayInfoGame[0]);                   
+
+        }                         
       }       
     }    
-    await loopReachableGames();  
-    console.log(reachebleGames);
+    await loopReachableGames();    
     this.setState({reachebleGames:reachebleGames});
-  }  
+  } 
+  
+  rngNotFound = async(id) => {
+    const { accounts, contract} = this.state;
+    await contract.methods.refundRNGnotFound(id).send({from: accounts[0]});
+  }
+
   
   openJoinSessionFct = async() => {
     const { accounts, contract} = this.state; 
@@ -127,18 +280,18 @@ class App extends Component {
     await contract.methods.playerWithdraw().send({from: accounts[0]});
   }
 
-  play = async(id) => {
-    const { accounts, contract, web3} = this.state;
+  // play = async(id) => {
+  //   const { accounts, contract, web3} = this.state;
     
-    const zeroX = this.letter.value;
-    console.log(zeroX);
-    const letter = web3.utils.utf8ToHex(zeroX);
-    console.log(letter);
-    console.log(typeof letter);    
+  //   const zeroX = this.letter.value;
+  //   console.log(zeroX);
+  //   const letter = web3.utils.utf8ToHex(zeroX);
+  //   console.log(letter);
+  //   console.log(typeof letter);    
     
-    await contract.methods.play(letter, id).send({from: accounts[0]});
-    this.runInit();
-  }
+  //   await contract.methods.play(letter, id).send({from: accounts[0]});
+  //   this.runInit();
+  // }
 
   addWord = async() => {
     const { accounts, contract, web3} = this.state;
@@ -150,34 +303,27 @@ class App extends Component {
     console.log(typeof word);
     await contract.methods.addWord(word).send({from: accounts[0]});
   }
-
-  rngNotFound = async(id) => {
-    const { accounts, contract} = this.state;
-    await contract.methods.refundRNGnotFound(id).send({from: accounts[0]});
-  }
-  requestWinTimeout = async(id) => {
-    const { accounts, contract} = this.state;
-    await contract.methods.requestWinTimeout(id).send({from: accounts[0]});
-  }
-
-
+  
   render() {
     // on recupere les state 
     const {arrayGames, reachebleGames, accounts, inGameBalance } = this.state;
-
-    // pour visualiser l'uint ID des propositions
-
-    
+       
     if (!this.state.web3) {
+
       return <div>Loading Web3, accounts, and contract...</div>;
+
     }
+
     return (
+
       <div className="App">
         <div>
             <h2 className="text-center">Penduel</h2>           
             <p className="text-center">connected account: {accounts}</p>                     
             <br></br>
-        </div>        
+        </div>            
+
+        <br></br>
 
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <Card style={{ width: '50rem' }}>
@@ -186,54 +332,30 @@ class App extends Component {
                 <ListGroup variant="flush">
                   <ListGroup.Item>
                     <Table striped bordered hover>                          
-                    <tbody>                  
-                      {arrayGames !== null && 
-                        arrayGames.map((b) =>                        
-                          <tr><td>
-                            <br></br>
-                              {b[4][0]}: {b[4][1]}
-                            <br></br>
-                              {b[0][0]}: {b[0][1]}
-                            <br></br>
-                              {b[1][0]}: {b[1][1]}
-                            <br></br>
-                              {b[2][0]}: {b[2][1]}                         
-                            <br></br>
-                              {b[5][0]}: {b[5][1]} wei
-                            <br></br>                              
-                              {b[3][0]}: {b[3][1]}
-                            <br></br>
-                              {b[6][0]}: {b[6][1]}                          
-                            <br></br>    
-                              {b[7][0]}: {b[7][1]}
-                            <br></br>
-                              {b[8][0]}: {b[8][1]}
-                            <br></br>                                                                            
-                            <Form.Group controlID="letter">
-                              <Form.Control type="text" id="bytes1" placeholder="type here your lowercase letter"
-                                ref={(input) => { this.letter = input }}
-                              />                        
-                              <br></br>
-                            </Form.Group>
-                            <Button onClick={() =>{this.play(b[4][1])}} variant="dark" > Play </Button>
-                          
-                            <div style={{display: 'flex', justifyContent: 'center'}}>
-                              <Card style={{ width: '20rem' }}>
-                              <Card.Header><strong>Refunding: Request RNG Time Out</strong></Card.Header>
-                                  <Card.Body>          
-                                    <Button onClick={() => this.rngNotFound(b[4][1])} variant="dark" > Request </Button>
-                                  </Card.Body>
-                                </Card>
-                            </div>
-
-                            <div  align='center' style={{display: 'flex', justifyContent: 'center'}}>
-                              <Card style={{ width: '20rem' }}>
-                              <Card.Header><strong>Request Victory: Oppent TimeOut</strong></Card.Header>                        
+                      <tbody>
+                        <tr><td> 
+                          <div style={{display: 'flex', justifyContent: 'center'}}>
+                            <Card style={{ width: '20rem' }}>
+                              <Card.Header><strong>Create New Game</strong></Card.Header>
                                 <Card.Body>
-                                  <Button onClick={() =>  this.requestWinTimeout(b[4][1])} variant="dark" > Request </Button>          
+                                  <Form.Group controlID="createSession">
+                                    <Form.Control type="number" id="betSize" placeholder="Bet Size amount in wei"
+                                        ref={(input) => { this.bet = input }}
+                                      />
+                                  </Form.Group>
+                                    <br></br>
+                                      <Button onClick={ this.createSession } variant="dark" > Create </Button>
                                 </Card.Body>
-                              </Card>
-                            </div>
+                            </Card>
+                          </div>  
+                        </td></tr>
+
+                        {arrayGames !== null && 
+                          arrayGames.map((b) =>                        
+                          <tr><td>                                                     
+                            <br></br>
+                              {b[1]}
+                            <br></br>                                                                                                    
                           </td></tr>
                         )
                       }
@@ -242,28 +364,11 @@ class App extends Component {
                 </ListGroup.Item>
               </ListGroup>
             </Card.Body>
-           </Card>                         
+          </Card>                         
         </div>
        
         <br></br>
-
-        <div style={{display: 'flex', justifyContent: 'center'}}>
-          <Card style={{ width: '50rem' }}>
-            <Card.Header><strong>Create New Game</strong></Card.Header>
-            <Card.Body>
-              <Form.Group controlID="createSession">
-                <Form.Control type="number" id="betSize" placeholder="Bet Size amount in wei"
-                ref={(input) => { this.bet = input }}
-                />
-              </Form.Group>
-              <br></br>
-              <Button onClick={ this.createSession } variant="dark" > Create </Button>
-            </Card.Body>
-          </Card>
-          </div>
-        <br></br>
-
-        
+            
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <Card style={{ width: '50rem' }}>
             <Card.Header><strong>Join</strong></Card.Header>
@@ -301,6 +406,17 @@ class App extends Component {
 
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <Card style={{ width: '50rem' }}>
+            <Card.Header><strong>In-Game Balance: {inGameBalance} wei</strong></Card.Header>
+            <Card.Body>          
+              <Button onClick={ this.withdraw } variant="dark" > withdraw </Button>
+            </Card.Body>
+          </Card>
+        </div>
+
+        <br></br>
+
+        <div style={{display: 'flex', justifyContent: 'center'}}>
+          <Card style={{ width: '50rem' }}>
             <Card.Header><strong>(Only Admin)</strong> </Card.Header>           
             <Card.Body>  
             <br></br>
@@ -317,43 +433,11 @@ class App extends Component {
               <br></br>
             </Card.Body>
           </Card>
-          </div>
-        <br></br>
+        </div>
 
-        
-
-        <div style={{display: 'flex', justifyContent: 'center'}}>
-          <Card style={{ width: '50rem' }}>
-            <Card.Header><strong>In-Game Balance: {inGameBalance} wei</strong></Card.Header>
-            <Card.Body>          
-              <Button onClick={ this.withdraw } variant="dark" > withdraw </Button>
-            </Card.Body>
-          </Card>
-          </div>
-        <br></br>
-      
-        <div style={{display: 'flex', justifyContent: 'center'}}>
-          <Card style={{ width: '50rem' }}>
-            <Card.Header><strong>Refunding: Request RNG Time Out</strong></Card.Header>
-            <Card.Body>          
-              <Button onClick={ this.refundRNGnotFound} variant="dark" > Request </Button>
-            </Card.Body>
-          </Card>
-          </div>
-        <br></br>
-
-        <div  align='center' style={{display: 'flex', justifyContent: 'center'}}>
-          <Card style={{ width: '50rem' }}>
-            <Card.Header><strong>Request Victory: Oppent TimeOut</strong></Card.Header>                        
-            <Card.Body>
-            <Button onClick={ this.requestWinTimeout} variant="dark" > Request </Button>          
-            </Card.Body>
-          </Card>
-          </div>
-        <br></br>      
+        <br></br> 
 
       </div>
-
     );
   }
 }
