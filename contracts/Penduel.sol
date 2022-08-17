@@ -50,7 +50,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         bool playerTwoFoundWord;
         bool firstLetterRemplaced;
         uint256 idSession;   
-        uint rngRequestDate; 
+        uint requestDate; 
         uint lastMoveDate;                         
         bytes32 word;        
     }
@@ -75,7 +75,12 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         NotCreated,
         Reachable,
         InProgress,
-        Finished
+        PlayerOneWin,
+        PlayerTwoWin,
+        Draw,
+        Cancelled,
+        POneWinByTimeout,
+        PTwoWinByTimeout
     } 
 
     modifier onlyPlayer(uint256 idSession) {
@@ -91,6 +96,9 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     event RNGRequested(uint256 indexed requestId, uint256 indexed idSession);
     event RNGFound(uint256 indexed requestId);
     event RandomWordsTaken(uint256[] randomWords);
+    event WordAdded();
+    event HasPlayed(uint256 idSession, address player);
+    event joinSessionFctPaused(bool paused);
     
 
   /* Constructor*/
@@ -110,16 +118,17 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     function playerWithdraw() external {  
         uint toSend = balance[msg.sender];
         balance[msg.sender]=0;
-		msg.sender.call{ value: toSend }("");             
+		(bool success, ) = msg.sender.call{ value: toSend }(""); 
+        require(success, "Address: unable to send value, recipient may have reverted");            
     }
 
     /// @param idSession uint256 for identify the session
     /// @notice if chainlink took too many times for given a rng the player can ask for a refund 
     function refundRNGnotFound(uint256 idSession) external {
         require(msg.sender == sessionPublic[idSession].playerOne || msg.sender == sessionPublic[idSession].playerTwo, "Error, Not your session");
-        require(session[idSession].word[0] == "","Error, RNG word already found"); // edit change "!=" to "==" not already compiled and deployed
-        require(block.timestamp > (session[idSession].rngRequestDate + 3 hours), "Error, TimeOut Not Reached");        
-        sessionPublic[idSession].state = StateSession.Finished;
+        require(session[idSession].word[0] == "","Error, RNG word already found"); 
+        require(block.timestamp > (session[idSession].requestDate + 3 hours), "Error, TimeOut Not Reached");        
+        sessionPublic[idSession].state = StateSession.Cancelled;
         balance[sessionPublic[idSession].playerOne] += sessionPublic[idSession].betSize;
         balance[sessionPublic[idSession].playerTwo] += sessionPublic[idSession].betSize;
     }
@@ -127,31 +136,54 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     /// @param idSession uint256 for identify the session
     /// @notice if the opponent player took too many times for playing you can ask for a win by TimeOut
     function requestWinTimeout(uint256 idSession) external {
-        require(block.timestamp > (timeOut + session[idSession].lastMoveDate), "Error, TimeOut Not Reached");
-        require(msg.sender == sessionPublic[idSession].playerOne || msg.sender == sessionPublic[idSession].playerTwo, "Error, Not your session");
+        require(block.timestamp > (timeOut + session[idSession].lastMoveDate), "Error, TimeOut Not Reached");    
+        require((msg.sender == sessionPublic[idSession].playerOne && sessionPublic[idSession].mustPlay == sessionPublic[idSession].playerTwo) || (msg.sender == sessionPublic[idSession].playerTwo && sessionPublic[idSession].mustPlay == sessionPublic[idSession].playerOne), "opponent has played OR not your session");
         require(sessionPublic[idSession].state == StateSession.InProgress,"Error, session is not in progress");
+        
 
-        if(sessionPublic[idSession].mustPlay == sessionPublic[idSession].playerTwo && msg.sender == sessionPublic[idSession].playerOne) {
-            sessionPublic[idSession].state = StateSession.Finished;
+        if(msg.sender == sessionPublic[idSession].playerOne) {
+            sessionPublic[idSession].state = StateSession.POneWinByTimeout;
             balance[sessionPublic[idSession].playerOne] += sessionPublic[idSession].betSize*2;
         }
-        if(sessionPublic[idSession].mustPlay == sessionPublic[idSession].playerOne && msg.sender == sessionPublic[idSession].playerTwo) {
-            sessionPublic[idSession].state = StateSession.Finished;
+        if(msg.sender == sessionPublic[idSession].playerTwo) {
+            sessionPublic[idSession].state = StateSession.PTwoWinByTimeout;
             balance[sessionPublic[idSession].playerTwo] += sessionPublic[idSession].betSize*2;
         }
+    }
+
+    /// @param idSession uint256 for identify the session
+    /// @notice 24hours after the creation of the game the creator can cancel it if no one join it
+    function requestCancelGame(uint256 idSession) external {
+        require(msg.sender == sessionPublic[idSession].playerOne, "Error, not your session");
+        require(sessionPublic[idSession].state == StateSession.Reachable,"session is not in reachable state ");
+        require(block.timestamp > (session[idSession].requestDate + timeOut) , "Error, TimeOut Not Reached");
+
+        sessionPublic[idSession].state = StateSession.Cancelled;
+        balance[sessionPublic[idSession].playerOne] += sessionPublic[idSession].betSize;
     }
 
     /// @param word it is a bytes32
     /// @notice allows the owner to add words to the list for the game
     function addWord(bytes32 word) external onlyOwner {
-        _words.push(word);  
+        _words.push(word);
+        emit WordAdded();  
     }  
 
     /// @dev first make sure that the contract has been added to the consumers on your chainlik subscription management page
     /// @notice autorised players to use the joinSession Function     
     function openJoinSessionFct() external onlyOwner {
-        joinSessionFctOpen = true;  
-    }    
+        require(joinSessionFctOpen == false,"Error, Already open");
+        joinSessionFctOpen = true;
+        emit joinSessionFctPaused(false);  
+    }   
+
+     
+    /// @notice unautorised players to use the joinSession Function     
+    function pausedJoinSessionFct() external onlyOwner {
+        require(joinSessionFctOpen == true,"Error, Already paused");
+        joinSessionFctOpen = false;
+        emit joinSessionFctPaused(true);  
+    }     
    
     /// @notice for create a new game session
     function createSession() external payable {
@@ -163,7 +195,8 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         session[totalCreatedSessions].idSession = totalCreatedSessions;
         sessionPublic[totalCreatedSessions].idSession = totalCreatedSessions;
         sessionPublic[totalCreatedSessions].playerOne = payable(msg.sender);
-        sessionPublic[totalCreatedSessions].betSize = msg.value;        
+        sessionPublic[totalCreatedSessions].betSize = msg.value; 
+        session[totalCreatedSessions].requestDate = block.timestamp;       
         sessionPublic[totalCreatedSessions].state = StateSession.Reachable;
 
         emit SessionCreated(totalCreatedSessions, msg.sender, msg.value);
@@ -179,6 +212,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         require(sessionPublic[idSession].state == StateSession.Reachable, 'Error, session unreachable');     
         
         sessionPublic[idSession].playerTwo = payable(msg.sender);
+        session[idSession].requestDate = block.timestamp;        
         sessionPublic[idSession].state = StateSession.InProgress;
         joinSessionFctOpen = false;
         requestId = COORDINATOR.requestRandomWords(
@@ -191,7 +225,6 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         reqId[requestId] = session[idSession].idSession;                // here we mapping request id with a session
         reqIdPublic[requestId] = session[idSession].idSession;    // same here with the public part for the front-end 
         emit RNGRequested(requestId, idSession);
-        session[idSession].rngRequestDate = block.timestamp;        
         sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
         playerGames[msg.sender].games.push(idSession);
         emit SessionJoined(idSession, msg.sender);
@@ -233,25 +266,26 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             compareAndCopy(session[idSession].word, letter, idSession);            
             sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
             session[idSession].lastMoveDate = block.timestamp;
+            emit HasPlayed(idSession,sessionPublic[idSession].playerOne);
            
             // Player one Find the word
             if(session[idSession].word == sessionPublic[idSession].playerOneGuess) {
                 session[idSession].playerOneFoundWord = true;
                 // Draw
                 if(session[idSession].playerTwoFoundWord == true){
-                    sessionPublic[idSession].state = StateSession.Finished;
+                    sessionPublic[idSession].state = StateSession.Draw;
                     balance[sessionPublic[idSession].playerOne] += sessionPublic[idSession].betSize;
                     balance[sessionPublic[idSession].playerTwo] += sessionPublic[idSession].betSize;
                 }                
                 // Player one Win
                 if(session[idSession].playerTwoFoundWord == false) {                
-                sessionPublic[idSession].state = StateSession.Finished;
+                sessionPublic[idSession].state = StateSession.PlayerOneWin;
                 balance[sessionPublic[idSession].playerOne] += sessionPublic[idSession].betSize*2;
                 }
             }
             // Player Two Win: Player Two find the word and player not found it
             if(session[idSession].playerTwoFoundWord == true && (session[idSession].playerOneFoundWord == false)){
-                sessionPublic[idSession].state = StateSession.Finished;
+                sessionPublic[idSession].state = StateSession.PlayerTwoWin;
                 balance[sessionPublic[idSession].playerTwo] += sessionPublic[idSession].betSize*2;
             }
         }
@@ -261,6 +295,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             compareAndCopy(session[idSession].word, letter, idSession);            
             sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerOne;
             session[idSession].lastMoveDate = block.timestamp;
+            emit HasPlayed(idSession,sessionPublic[idSession].playerTwo);
 
             // Player Two find the world 
             if(session[idSession].word == sessionPublic[idSession].playerTwoGuess) {
@@ -311,7 +346,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     /// @param idSession uint256 for identify the sesFsion
     /// @notice get the word legth for a given session
     function getSessionWordLength(uint256 idSession) private view returns (uint8){
-        require(sessionPublic[idSession].state == StateSession.InProgress || sessionPublic[idSession].state == StateSession.Finished, "Error, This session does not have already a word");
+        require(sessionPublic[idSession].state != StateSession.NotCreated && sessionPublic[idSession].state != StateSession.Reachable, "Error, This session does not have already a word");
         uint8 i = 0;
         while(i < 32 && session[idSession].word[i] != 0) {
             i++;

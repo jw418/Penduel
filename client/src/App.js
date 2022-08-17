@@ -273,11 +273,13 @@ class App extends Component {
   joinSession = async(id,bet) => {
     const { accounts, contract} = this.state;       
     await contract.methods.joinSession(id).send({from: accounts[0], value: bet });
+    this.runInit();
   }
 
   withdraw = async() => {
     const { accounts, contract} = this.state;       
     await contract.methods.playerWithdraw().send({from: accounts[0]});
+    this.runInit();
   }
 
   // play = async(id) => {
@@ -339,7 +341,7 @@ class App extends Component {
                               <Card.Header><strong>Create New Game</strong></Card.Header>
                                 <Card.Body>
                                   <Form.Group controlID="createSession">
-                                    <Form.Control type="number" id="betSize" placeholder="Bet Size amount in wei"
+                                    <Form.Control type="number" id="betSize" placeholder="Bet Size in Wei"
                                         ref={(input) => { this.bet = input }}
                                       />
                                   </Form.Group>
@@ -349,13 +351,16 @@ class App extends Component {
                             </Card>
                           </div>  
                         </td></tr>
-
+                          <br></br>
+                        
+                                          
                         {arrayGames !== null && 
                           arrayGames.map((b) =>                        
                           <tr><td>                                                     
                             <br></br>
                               {b[1]}
-                            <br></br>                                                                                                    
+                            <br></br>                                                                           
+                         
                           </td></tr>
                         )
                       }
@@ -364,7 +369,7 @@ class App extends Component {
                 </ListGroup.Item>
               </ListGroup>
             </Card.Body>
-          </Card>                         
+           </Card>                         
         </div>
        
         <br></br>
@@ -438,6 +443,7 @@ class App extends Component {
         <br></br> 
 
       </div>
+
     );
   }
 }
