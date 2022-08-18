@@ -12,7 +12,7 @@ import "./App.css";
 
 class App extends Component {
   
-  state = { web3: null, accounts: null, contract: null, playerGames: null, arrayGames: null, reachebleGames: null, inGameBalance: null};
+  state = { web3: null, accounts: null, contract: null, playerGames: null, arrayGames: null, reachebleGames: null, inGameBalance: null, owner:null};
   componentWillMount = async () => {
     try {
       // Récupérer le provider web3
@@ -44,7 +44,9 @@ class App extends Component {
 
   // les states qui doivent etre actualisé
   runInit = async() => {
-    const { contract, accounts, web3 } = this.state;   
+    const { contract, accounts, web3} = this.state; 
+    const owner = '0x8014Dd2b5f8a6513A7c4116D961cb5872F4bcA1b'; 
+    this.setState({owner: owner}); 
 
     const inGameBalance = await contract.methods.balance(accounts[0]).call();    
     this.setState({ inGameBalance: inGameBalance });    
@@ -63,7 +65,7 @@ class App extends Component {
     
     // a modifié pour que l'input soit dans le scop
     const play = async(letter, id) => {
-      const { accounts, contract, web3} = this.state;          
+      const { accounts, contract} = this.state;          
       console.log(letter);      
       console.log(typeof letter);
       await contract.methods.play(letter, id).send({from: accounts[0]});
@@ -73,6 +75,12 @@ class App extends Component {
     const requestWinTimeout = async(id) => {
       const { accounts, contract} = this.state;
       await contract.methods.requestWinTimeout(id).send({from: accounts[0]});
+    }
+
+    const cancelGame = async(id) => {
+      const { accounts, contract} = this.state;       
+      await contract.methods.requestCancelGame(id).send({from: accounts[0]});
+      this.runInit();
     }
   
     // initialisation de l'array qui contient les infos des differentes parties de l'utilisateurs
@@ -102,18 +110,34 @@ class App extends Component {
         let playerTurn;
         let userGuess;
         let textEndgame;
+        let toRender;
         let index;
+        let renderRNGButton;
         
         // création du rendu selon l'etat de la partie
         // si la partie est joigable
         if(status == 1) {
         
           index = 0;  
-          let toRender =
-          <>                       
-            <p>Game ID: {id}  Bet Size: {betSize} Wei Created By: You</p>
-            <h5>Await for a Second Player</h5>
-          </>;        
+          toRender =
+          <>  <div style={{display: 'flex', justifyContent: 'center'}}>
+                <Card>
+                  <Card.Header>Game ID: {id}  Bet Size: {betSize} Wei Created By: You</Card.Header>                       
+                    <Card.Body>                      
+                      <h5>Await for a Second Player</h5>
+                      <div  align='center' style={{display: 'flex', justifyContent: 'center'}}>
+                        <Card style={{ width: '20rem' }}>
+                          <Card.Header><strong>Cancel the game</strong></Card.Header>                        
+                            <Card.Body>
+                              <Button onClick={() =>  cancelGame(id)} variant="dark" > Cancel </Button>          
+                            </Card.Body>
+                        </Card>
+                      </div>  
+                  </Card.Body>
+                </Card>
+              </div>                     
+          </>;
+
           arrayGames.push([index, id, toRender]);
          
         // si la partie est en cours  
@@ -128,13 +152,20 @@ class App extends Component {
             userGuess = rawPTwoGuess;
           }
 
-          if(mustPlay == accounts[0]) {
-            playerTurn = 'Your Turn'
-          }else{
-            playerTurn = 'Opponent Turn'
+          if (wordLength == 0) {
+            renderRNGButton=
+            <>
+              <div style={{display: 'flex', justifyContent: 'center'}}>
+                <Card style={{ width: '20rem' }}>
+                  <Card.Header><strong>Refunding: Request RNG Time Out</strong></Card.Header>
+                    <Card.Body>                          
+                      <Button onClick={() => rngNotFound(id)} variant="dark" > Request </Button>
+                    </Card.Body>
+                </Card>
+              </div>
+            </>;
           }
-
-
+          
           // ici on convertie le mot du joueur de bytes32 à utf8 
           let hexString = userGuess.slice(2, 2 + (wordLength*2));          
           let guessString="";
@@ -151,72 +182,92 @@ class App extends Component {
 
             }
           }
-          
-          let toRender=
-            <>                       
-            <p>Game ID: {id}  Bet Size: {betSize} Wei  Opponent: {opponent}</p>
-            <p>{playerTurn}</p>
-            <p>your guess:  <h1>{guessString}</h1></p>
-            <p>Game: In Progress</p>         
-          
-            <br></br>
+
+          if(mustPlay == accounts[0]) {
+
+            playerTurn = 'Your Turn';
+            toRender=
+              <> <div style={{display: 'flex', justifyContent: 'center'}}>
+                <Card>
+                  <Card.Header>Game ID: {id}  Bet Size: {betSize} Wei  Opponent: {opponent}</Card.Header>                       
+                    <Card.Body>                                   
+                      <p>{playerTurn}</p>
+                      <p>your guess:  <h1>{guessString}</h1></p>
+                      <p>Game: In Progress</p>          
+                    <br></br>
+                      <p>{renderRNGButton}</p>
            
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-              <Card style={{ width: '20rem' }}>
-                <Card.Header><strong>Play</strong></Card.Header>
-                  <Card.Body>                          
-                  <Button onClick={() =>{play('0x61', id)}} variant="dark" >A</Button>
-                  <Button onClick={() =>{play('0x62', id)}} variant="dark" >B</Button>
-                  <Button onClick={() =>{play('0x63', id)}} variant="dark" >C</Button>
-                  <Button onClick={() =>{play('0x64', id)}} variant="dark" >D</Button>
-                  <Button onClick={() =>{play('0x65', id)}} variant="dark" >E</Button>
-                  <Button onClick={() =>{play('0x66', id)}} variant="dark" >F</Button>
-                  <Button onClick={() =>{play('0x67', id)}} variant="dark" >G</Button>
-                  <Button onClick={() =>{play('0x68', id)}} variant="dark" >H</Button>
-                  <Button onClick={() =>{play('0x69', id)}} variant="dark" >I</Button>
-                  <Button onClick={() =>{play('0x6a', id)}} variant="dark" >J</Button>
-                  <Button onClick={() =>{play('0x6b', id)}} variant="dark" >K</Button>
-                  <Button onClick={() =>{play('0x6c', id)}} variant="dark" >L</Button>
-                  <Button onClick={() =>{play('0x6d', id)}} variant="dark" >M</Button>
-                  <Button onClick={() =>{play('0x6e', id)}} variant="dark" >N</Button>
-                  <Button onClick={() =>{play('0x6f', id)}} variant="dark" >O</Button>
-                  <Button onClick={() =>{play('0x70', id)}} variant="dark" >P</Button>
-                  <Button onClick={() =>{play('0x71', id)}} variant="dark" >Q</Button>
-                  <Button onClick={() =>{play('0x72', id)}} variant="dark" >R</Button>
-                  <Button onClick={() =>{play('0x73', id)}} variant="dark" >S</Button>                  
-                  <Button onClick={() =>{play('0x74', id)}} variant="dark" >T</Button>
-                  <Button onClick={() =>{play('0x75', id)}} variant="dark" >U</Button>
-                  <Button onClick={() =>{play('0x76', id)}} variant="dark" >V</Button>
-                  <Button onClick={() =>{play('0x77', id)}} variant="dark" >W</Button>
-                  <Button onClick={() =>{play('0x78', id)}} variant="dark" >X</Button>
-                  <Button onClick={() =>{play('0x79', id)}} variant="dark" >Y</Button>
-                  <Button onClick={() =>{play('0x7a', id)}} variant="dark" >Z</Button>      
-                  </Card.Body>
-              </Card>
-            </div>
-
-
-                 
-                         
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-              <Card style={{ width: '20rem' }}>
-                <Card.Header><strong>Refunding: Request RNG Time Out</strong></Card.Header>
-                  <Card.Body>                          
-                    <Button onClick={() => rngNotFound(id)} variant="dark" > Request </Button>
-                  </Card.Body>
-              </Card>
-            </div>
-
-            <div  align='center' style={{display: 'flex', justifyContent: 'center'}}>
-              <Card style={{ width: '20rem' }}>
-                <Card.Header><strong>Request Victory: Oppent TimeOut</strong></Card.Header>                        
-                  <Card.Body>
-                    <Button onClick={() =>  requestWinTimeout(id)} variant="dark" > Request </Button>          
-                  </Card.Body>
-               </Card>
-            </div>    
-                             
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                  <Card style={{ width: '20rem' }}>
+                    <Card.Header><strong>Play</strong></Card.Header>
+                      <Card.Body >                          
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x61', id)}} variant="dark" >A</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x62', id)}} variant="dark" >B</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x63', id)}} variant="dark" >C</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x64', id)}} variant="dark" >D</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x65', id)}} variant="dark" >E</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x66', id)}} variant="dark" >F</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x67', id)}} variant="dark" >G</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x68', id)}} variant="dark" >H</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x69', id)}} variant="dark" >I</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x6a', id)}} variant="dark" >J</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x6b', id)}} variant="dark" >K</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x6c', id)}} variant="dark" >L</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x6d', id)}} variant="dark" >M</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x6e', id)}} variant="dark" >N</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x6f', id)}} variant="dark" >O</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x70', id)}} variant="dark" >P</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x71', id)}} variant="dark" >Q</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x72', id)}} variant="dark" >R</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x73', id)}} variant="dark" >S</Button>                  
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x74', id)}} variant="dark" >T</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x75', id)}} variant="dark" >U</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x76', id)}} variant="dark" >V</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x77', id)}} variant="dark" >W</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x78', id)}} variant="dark" >X</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x79', id)}} variant="dark" >Y</Button>
+                        <Button style={{ margin: '1px'}} onClick={() =>{play('0x7a', id)}} variant="dark" >Z</Button>      
+                      </Card.Body>
+                    </Card>
+                </div>
+                </Card.Body>
+                </Card>
+              </div>  
           </>;
+
+
+          }else{
+            playerTurn = 'Await your turn';
+            toRender=
+              <> 
+              <div style={{display: 'flex', justifyContent: 'center'}}>
+                <Card>
+                  <Card.Header>Game ID: {id}  Bet Size: {betSize} Wei  Opponent: {opponent}</Card.Header>                       
+                    <Card.Body>                
+                      <p>{playerTurn}</p>
+                      <p>your guess:  <h1>{guessString}</h1></p>
+                      <p>Game: In Progress</p> 
+                      <p>{renderRNGButton}</p>        
+          
+                <br></br>
+                <div  align='center' style={{display: 'flex', justifyContent: 'center'}}>
+                  <Card style={{ width: '20rem' }}>
+                    <Card.Header><strong>Request Victory: Oppent TimeOut</strong></Card.Header>                        
+                      <Card.Body>
+                        <Button onClick={() =>  requestWinTimeout(id)} variant="dark" > Request </Button>          
+                    </Card.Body>
+                  </Card>
+                </div>
+                </Card.Body>
+                </Card>
+              </div>    
+            </>
+          }
+
+
+          
+          
+          
 
         arrayGames.push([index, id, toRender]);
         
@@ -251,10 +302,17 @@ class App extends Component {
           }
                   
           let toRender=
-          <>                       
-            <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+          <> 
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+                <Card>
+                  <Card.Header>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</Card.Header>                       
+                    <Card.Body>                                   
+                  
             <p>your guess:  <h1>{guessString}</h1></p>
             <h5>{textEndgame}</h5>
+            </Card.Body>
+                </Card>
+              </div>
           </>;
 
           arrayGames.push([index, id, toRender]);
@@ -290,10 +348,17 @@ class App extends Component {
           }
                 
           let toRender=
-          <>                       
-            <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+          <><div style={{display: 'flex', justifyContent: 'center'}}>
+          <Card>
+            <Card.Header>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</Card.Header>                       
+              <Card.Body>                       
+             
+                      
             <p>your guess:  <h1>{guessString}</h1></p>
             <h5>{textEndgame}</h5>
+            </Card.Body>
+                </Card>
+              </div>
           </>;
 
           arrayGames.push([index, id, toRender]);
@@ -329,10 +394,18 @@ class App extends Component {
           }
                 
           let toRender=
-            <>                       
-              <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+            <>  
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                <Card>
+                  <Card.Header>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</Card.Header>                       
+                    <Card.Body>                 
+               
+                      
               <p>your guess:  <h1>{guessString}</h1></p>
               <h5>{textEndgame}</h5>
+              </Card.Body>
+                </Card>
+              </div>
             </>;
 
           arrayGames.push([index, id, toRender]);
@@ -344,9 +417,14 @@ class App extends Component {
         textEndgame = `Game Cancelled! ${betSize} Wei have been credited to your in-game balance `;       
                         
         let toRender=
-        <>                       
-          <p>Game ID: {id}  Bet Size: {betSize} Wei</p>                      
+        <>  <div style={{display: 'flex', justifyContent: 'center'}}>
+        <Card>
+          <Card.Header>Game ID: {id}  Bet Size: {betSize} Wei</Card.Header>                       
+            <Card.Body>                                                             
           <h5>{textEndgame}</h5>
+          </Card.Body>
+                </Card>
+              </div>
         </>;
 
         arrayGames.push([index, id, toRender]); 
@@ -382,10 +460,16 @@ class App extends Component {
         }
                   
         let toRender=
-          <>                       
-            <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+          <>   <div style={{display: 'flex', justifyContent: 'center'}}>
+          <Card>
+            <Card.Header>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</Card.Header>                       
+              <Card.Body>                                 
+                  
             <p>your guess:  <h1>{guessString}</h1></p>
             <h5>{textEndgame}</h5>
+            </Card.Body>
+                </Card>
+              </div>
           </>;
   
         arrayGames.push([index, id, toRender]);  
@@ -421,10 +505,18 @@ class App extends Component {
           }
                     
           let toRender=
-            <>                       
-              <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+            <>
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+                <Card>
+                  <Card.Header>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</Card.Header>                       
+                    <Card.Body>                       
+           
+                        
               <p>your guess:  <h1>{guessString}</h1></p>
               <h5>{textEndgame}</h5>
+              </Card.Body>
+                </Card>
+              </div>
             </>;
     
           arrayGames.push([index, id, toRender]);  
@@ -465,10 +557,10 @@ class App extends Component {
   }
 
   
-  openJoinSessionFct = async() => {
-    const { accounts, contract} = this.state; 
-      
-    await contract.methods.openJoinSessionFct().send({from: accounts[0]});    
+  withdraw = async() => {
+    const { accounts, contract} = this.state;       
+    await contract.methods.playerWithdraw().send({from: accounts[0]});
+    this.runInit();
   }
 
   createSession = async() => {
@@ -476,7 +568,7 @@ class App extends Component {
     const bet = this.bet.value;
     await contract.methods.createSession().send({from: accounts[0], value: bet }); 
     this.runInit();
-    }
+  }  
   
   joinSession = async(id,bet) => {
     const { accounts, contract} = this.state;       
@@ -484,31 +576,26 @@ class App extends Component {
     this.runInit();
   }
 
-  withdraw = async() => {
+  pausedJoinSessionFct = async() => {
     const { accounts, contract} = this.state;       
-    await contract.methods.playerWithdraw().send({from: accounts[0]});
+    await contract.methods.pausedJoinSessionFct().send({from: accounts[0]});
     this.runInit();
   }
 
-  // play = async(id) => {
-  //   const { accounts, contract, web3} = this.state;
-    
-  //   const zeroX = this.letter.value;
-  //   console.log(zeroX);
-  //   const letter = web3.utils.utf8ToHex(zeroX);
-  //   console.log(letter);
-  //   console.log(typeof letter);    
-    
-  //   await contract.methods.play(letter, id).send({from: accounts[0]});
-  //   this.runInit();
-  // }
+  openJoinSessionFct = async() => {
+    const { accounts, contract} = this.state;       
+    await contract.methods.openJoinSessionFct().send({from: accounts[0]});
+    this.runInit();
+  }  
 
   addWord = async() => {
     const { accounts, contract, web3} = this.state;
 
     const string = this.string.value;
     console.log(string);
-    const word = web3.utils.utf8ToHex(string);
+    const lowerString = string.toLowerCase();
+    console.log(lowerString)
+    const word = web3.utils.utf8ToHex(lowerString);
     console.log(word);
     console.log(typeof word);
     await contract.methods.addWord(word).send({from: accounts[0]});
@@ -516,7 +603,7 @@ class App extends Component {
   
   render() {
     // on recupere les state 
-    const {arrayGames, reachebleGames, accounts, inGameBalance } = this.state;
+    const {arrayGames, reachebleGames, accounts, inGameBalance, owner } = this.state;
        
     if (!this.state.web3) {
 
@@ -527,28 +614,27 @@ class App extends Component {
     return (
 
       <div className="App">
-        <div>
-            <h2 className="text-center">Penduel</h2>           
-            <p className="text-center">connected account: {accounts}</p>                     
+        <div style={{display: 'inline­-flex',  margin: '7px', justifyContent: 'spaceBetween'}}>
+            <div></div>
+            <div><h2 className="text-center">Penduel</h2></div>                   
+            <div><Button variant="dark">{accounts}</Button></div>  
             <br></br>
         </div>            
+            <hr></hr>                   
 
         <br></br>
 
-        <div style={{display: 'flex', justifyContent: 'center'}}>
-          <Card style={{ width: '50rem' }}>
+        <div style={{display: 'flex',justifyContent:'center'}}>
+          <Card style={{display: 'flex', flexDirection:'column'}}>
             <Card.Header><strong>Your sessions</strong></Card.Header>
-              <Card.Body>
-                <ListGroup variant="flush">
-                  <ListGroup.Item>
-                    <Table striped bordered hover>                          
+              <Card.Body>                                     
                       <tbody>
                         <tr><td> 
-                          <div style={{display: 'flex', justifyContent: 'center'}}>
-                            <Card style={{ width: '20rem' }}>
+                          <div style={{display: 'flex', justifyContent:'center' }}>
+                            <Card style={{ width: '23rem',alignContent:'center' }}>
                               <Card.Header><strong>Create New Game</strong></Card.Header>
                                 <Card.Body>
-                                  <Form.Group controlID="createSession">
+                                  <Form.Group id="createSession">
                                     <Form.Control type="number" id="betSize" placeholder="Bet Size in Wei"
                                         ref={(input) => { this.bet = input }}
                                       />
@@ -564,18 +650,14 @@ class App extends Component {
                                           
                         {arrayGames !== null && 
                           arrayGames.map((b) =>                        
-                          <tr><td>                                                     
-                            <br></br>
+                          <div>                                                                               
                               {b[2]}
-                            <br></br>                                                                           
-                         
-                          </td></tr>
+                            <br></br>                         
+                          </div>
                         )
                       }
                     </tbody>
-                  </Table>
-                </ListGroup.Item>
-              </ListGroup>
+                
             </Card.Body>
            </Card>                         
         </div>
@@ -626,32 +708,35 @@ class App extends Component {
           </Card>
         </div>
 
-        <br></br>
+          <br></br>
 
-        <div style={{display: 'flex', justifyContent: 'center'}}>
-          <Card style={{ width: '50rem' }}>
-            <Card.Header><strong>(Only Admin)</strong> </Card.Header>           
-            <Card.Body>  
-            <br></br>
-            <Button onClick={ this.openJoinSessionFct} variant="dark" > openJoinSessionFct() </Button>
-            <br></br>
-            <Form.Group controlId="createSession">
-                <br></br>
-                <Form.Control type="text" id="uintVote" placeholder="word"
-                ref={(input) => { this.string= input }}              
-                />
-              </Form.Group>
-              <br></br>
-              <Button onClick={ this.addWord } variant="dark" > Add Word </Button>             
-              <br></br>
-            </Card.Body>
-          </Card>
-        </div>
-
-        <br></br> 
-
-      </div>
-
+        {accounts[0] == owner ? <>
+          <div style={{display: 'flex', justifyContent: 'center'}}>
+            <Card style={{ width: '50rem' }}>
+              <Card.Header><strong>(Only Admin)</strong> </Card.Header>           
+                <Card.Body>  
+                  <br></br>
+                    <Button  style={{ margin: '3px'}}onClick={ this.openJoinSessionFct} variant="dark" > openJoinSessionFct() </Button>
+                  <br></br>
+                    <Button onClick={ this.pausedJoinSessionFct} variant="dark" > pausedJoinSessionFct() </Button>
+                  <br></br>
+                    <Form.Group id="createSession">
+                      <br></br>
+                      <Form.Control type="text" id="uintVote" placeholder="word"
+                        ref={(input) => { this.string= input }}              
+                      />
+                    </Form.Group>
+                      <br></br>
+                    <Button  style={{ margin: '3px'}}onClick={ this.addWord } variant="dark" > Add Word </Button>             
+                      <br></br>
+                </Card.Body>
+            </Card>
+          </div>
+          </>
+            :<></> 
+        }
+      <br></br> 
+    </div>
     );
   }
 }
