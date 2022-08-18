@@ -50,7 +50,8 @@ class App extends Component {
     this.setState({ inGameBalance: inGameBalance });    
 
     // récupérer la listes des parties du joueur connecté
-    const playerGames = await contract.methods.getPlayerGames(accounts[0]).call();    
+    const playerGames = await contract.methods.getPlayerGames(accounts[0]).call(); 
+    console.log(playerGames);   
     this.setState({ playerGames: playerGames });
 
     const rngNotFound = async(id) => {
@@ -58,17 +59,13 @@ class App extends Component {
       await contract.methods.refundRNGnotFound(id).send({from: accounts[0]});
     }
 
+    
+    
     // a modifié pour que l'input soit dans le scop
-    let letters;
-    const play = async(id) => {
+    const play = async(letter, id) => {
       const { accounts, contract, web3} = this.state;          
-      console.log(letters);
-      
-      console.log(typeof letters);      
-      const letter = web3.utils.utf8ToHex(letters);
-      console.log(letter);
-      console.log(typeof letter);    
-      
+      console.log(letter);      
+      console.log(typeof letter);
       await contract.methods.play(letter, id).send({from: accounts[0]});
       this.runInit();
     }
@@ -104,24 +101,28 @@ class App extends Component {
         let opponent;
         let playerTurn;
         let userGuess;
+        let textEndgame;
+        let index;
         
         // création du rendu selon l'etat de la partie
         // si la partie est joigable
         if(status == 1) {
         
+          index = 0;  
           let toRender =
           <>                       
             <p>Game ID: {id}  Bet Size: {betSize} Wei Created By: You</p>
-            <p>Await for a Second Player</p>
+            <h5>Await for a Second Player</h5>
           </>;        
-          arrayGames.push([id, toRender]);
+          arrayGames.push([index, id, toRender]);
          
         // si la partie est en cours  
         }else if(status == 2) {
           
+          index = 1;
           if(pOne == accounts[0]) {
             opponent = pTwo;
-            userGuess = rawPOneGuess;
+            userGuess = rawPOneGuess;           
           }else{
             opponent= pOne;
             userGuess = rawPTwoGuess;
@@ -141,12 +142,12 @@ class App extends Component {
             
             if (hexString[j]+ hexString[j+1]== "00"){
               
-              guessString = guessString + "_";
+              guessString = guessString + " _ ";
             
             }else{
 
               let toConvert = `0x${hexString[j]}${hexString[j+1]}00000000000000000000000000000000000000000000000000000000000000`;             
-              guessString = guessString + web3.utils.hexToUtf8(toConvert); 
+              guessString = guessString + web3.utils.hexToUtf8(toConvert).toUpperCase(); 
 
             }
           }
@@ -155,16 +156,47 @@ class App extends Component {
             <>                       
             <p>Game ID: {id}  Bet Size: {betSize} Wei  Opponent: {opponent}</p>
             <p>{playerTurn}</p>
-            <h2>{guessString}</h2>
-            <p>Game: In Progress</p>
+            <p>your guess:  <h1>{guessString}</h1></p>
+            <p>Game: In Progress</p>         
           
-            <Form.Group controlID="letters">
-              <Form.Control type="text" id="bytes1" placeholder="type here your lowercase letter"
-                                ref={(input) => { letters = input }}
-                              />                        
-            </Form.Group>
             <br></br>
-            <Button onClick={() =>{play(id)}} variant="dark" > Play </Button>
+           
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+              <Card style={{ width: '20rem' }}>
+                <Card.Header><strong>Play</strong></Card.Header>
+                  <Card.Body>                          
+                  <Button onClick={() =>{play('0x61', id)}} variant="dark" >A</Button>
+                  <Button onClick={() =>{play('0x62', id)}} variant="dark" >B</Button>
+                  <Button onClick={() =>{play('0x63', id)}} variant="dark" >C</Button>
+                  <Button onClick={() =>{play('0x64', id)}} variant="dark" >D</Button>
+                  <Button onClick={() =>{play('0x65', id)}} variant="dark" >E</Button>
+                  <Button onClick={() =>{play('0x66', id)}} variant="dark" >F</Button>
+                  <Button onClick={() =>{play('0x67', id)}} variant="dark" >G</Button>
+                  <Button onClick={() =>{play('0x68', id)}} variant="dark" >H</Button>
+                  <Button onClick={() =>{play('0x69', id)}} variant="dark" >I</Button>
+                  <Button onClick={() =>{play('0x6a', id)}} variant="dark" >J</Button>
+                  <Button onClick={() =>{play('0x6b', id)}} variant="dark" >K</Button>
+                  <Button onClick={() =>{play('0x6c', id)}} variant="dark" >L</Button>
+                  <Button onClick={() =>{play('0x6d', id)}} variant="dark" >M</Button>
+                  <Button onClick={() =>{play('0x6e', id)}} variant="dark" >N</Button>
+                  <Button onClick={() =>{play('0x6f', id)}} variant="dark" >O</Button>
+                  <Button onClick={() =>{play('0x70', id)}} variant="dark" >P</Button>
+                  <Button onClick={() =>{play('0x71', id)}} variant="dark" >Q</Button>
+                  <Button onClick={() =>{play('0x72', id)}} variant="dark" >R</Button>
+                  <Button onClick={() =>{play('0x73', id)}} variant="dark" >S</Button>                  
+                  <Button onClick={() =>{play('0x74', id)}} variant="dark" >T</Button>
+                  <Button onClick={() =>{play('0x75', id)}} variant="dark" >U</Button>
+                  <Button onClick={() =>{play('0x76', id)}} variant="dark" >V</Button>
+                  <Button onClick={() =>{play('0x77', id)}} variant="dark" >W</Button>
+                  <Button onClick={() =>{play('0x78', id)}} variant="dark" >X</Button>
+                  <Button onClick={() =>{play('0x79', id)}} variant="dark" >Y</Button>
+                  <Button onClick={() =>{play('0x7a', id)}} variant="dark" >Z</Button>      
+                  </Card.Body>
+              </Card>
+            </div>
+
+
+                 
                          
             <div style={{display: 'flex', justifyContent: 'center'}}>
               <Card style={{ width: '20rem' }}>
@@ -186,16 +218,20 @@ class App extends Component {
                              
           </>;
 
-        arrayGames.push([id, toRender]);
+        arrayGames.push([index, id, toRender]);
         
+        // Player One Win
         }else if (status == 3){
           
+          index = 2;
           if(pOne == accounts[0]) {
             opponent = pTwo;
             userGuess = rawPOneGuess;
+            textEndgame = `Victory!! ${betSize*2} Wei have been credited to your in-game balance `; 
           }else{
             opponent= pOne;
             userGuess = rawPTwoGuess;
+            textEndgame = `Defeat`;
           }          
           
           let hexString = userGuess.slice(2, 2 + (wordLength*2));          
@@ -204,29 +240,201 @@ class App extends Component {
             
             if (hexString[j]+ hexString[j+1]== "00"){
              
-              guessString = guessString + "_";
+              guessString = guessString + " _ ";
              
             }else{
              
               let toConvert = `0x${hexString[j]}${hexString[j+1]}00000000000000000000000000000000000000000000000000000000000000`;             
-              guessString = guessString + web3.utils.hexToUtf8(toConvert);
+              guessString = guessString + web3.utils.hexToUtf8(toConvert).toUpperCase();
               
             }
           }
                   
           let toRender=
           <>                       
-            <p>Game ID: {id}  Bet Size: {betSize} Wei  Opponent: {opponent}</p>            
-            <h2>{guessString}</h2>
-            <p>Game: Finshed </p>
+            <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+            <p>your guess:  <h1>{guessString}</h1></p>
+            <h5>{textEndgame}</h5>
           </>;
 
-          arrayGames.push([id, toRender]);
+          arrayGames.push([index, id, toRender]);
         
-        }       
-      }        
+         
+        // Player two Win
+        }else if (status == 4){
+          index = 2;
+          if(pOne == accounts[0]) {
+            opponent = pTwo;
+            userGuess = rawPOneGuess;
+            textEndgame = `Defeat`;          
+          }else{
+            opponent= pOne;
+            userGuess = rawPTwoGuess;
+            textEndgame = `Victory!! ${betSize*2} Wei have been credited to your in-game balance `; 
+          }          
+        
+          let hexString = userGuess.slice(2, 2 + (wordLength*2));          
+          let guessString="";
+          for (let j =0; j< hexString.length; j= j+2){
+          
+            if (hexString[j]+ hexString[j+1]== "00"){
+           
+              guessString = guessString + " _ ";
+           
+            }else{
+           
+              let toConvert = `0x${hexString[j]}${hexString[j+1]}00000000000000000000000000000000000000000000000000000000000000`;             
+              guessString = guessString + web3.utils.hexToUtf8(toConvert).toUpperCase();
+            
+            }
+          }
+                
+          let toRender=
+          <>                       
+            <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+            <p>your guess:  <h1>{guessString}</h1></p>
+            <h5>{textEndgame}</h5>
+          </>;
+
+          arrayGames.push([index, id, toRender]);
+      
+        // Draw
+        }else if (status == 5){
+          
+          index = 2;
+          if(pOne == accounts[0]) {
+            opponent = pTwo;
+            userGuess = rawPOneGuess;         
+          
+          }else{
+            opponent= pOne;
+            userGuess = rawPTwoGuess;
+          }          
+        
+          textEndgame = `Draw! ${betSize} Wei have been credited to your in-game balance `; 
+          let hexString = userGuess.slice(2, 2 + (wordLength*2));          
+          let guessString="";
+          for (let j =0; j< hexString.length; j= j+2){
+          
+            if (hexString[j]+ hexString[j+1]== "00"){
+           
+              guessString = guessString + " _ ";
+           
+            }else{
+           
+              let toConvert = `0x${hexString[j]}${hexString[j+1]}00000000000000000000000000000000000000000000000000000000000000`;             
+              guessString = guessString + web3.utils.hexToUtf8(toConvert).toUpperCase();
+            
+            } 
+          }
+                
+          let toRender=
+            <>                       
+              <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+              <p>your guess:  <h1>{guessString}</h1></p>
+              <h5>{textEndgame}</h5>
+            </>;
+
+          arrayGames.push([index, id, toRender]);
+      
+      // Cancelled by creator of the game  
+      } else if (status == 6){       
+        
+        index = 3;
+        textEndgame = `Game Cancelled! ${betSize} Wei have been credited to your in-game balance `;       
+                        
+        let toRender=
+        <>                       
+          <p>Game ID: {id}  Bet Size: {betSize} Wei</p>                      
+          <h5>{textEndgame}</h5>
+        </>;
+
+        arrayGames.push([index, id, toRender]); 
+
+      // Player One Win by TimeOut
+      }else if (status == 7){
+        
+        index = 2;
+        if(pOne == accounts[0]) {
+          opponent = pTwo;
+          userGuess = rawPOneGuess;         
+          textEndgame = `Victory by TimeOut! ${betSize*2} Wei have been credited to your in-game balance `;             
+        }else{
+          opponent= pOne;
+          userGuess = rawPTwoGuess;
+          textEndgame = `Defeat! More than 24 hours have passed since\n your opponent's last move, he has requested a TimeOut Victory `;
+        }          
+          
+        let hexString = userGuess.slice(2, 2 + (wordLength*2));          
+        let guessString="";
+        for (let j =0; j< hexString.length; j= j+2){
+          
+          if (hexString[j]+ hexString[j+1]== "00"){
+           
+            guessString = guessString + " _ ";
+            
+          }else{
+             
+            let toConvert = `0x${hexString[j]}${hexString[j+1]}00000000000000000000000000000000000000000000000000000000000000`;             
+            guessString = guessString + web3.utils.hexToUtf8(toConvert).toUpperCase();
+            
+          }
+        }
+                  
+        let toRender=
+          <>                       
+            <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+            <p>your guess:  <h1>{guessString}</h1></p>
+            <h5>{textEndgame}</h5>
+          </>;
+  
+        arrayGames.push([index, id, toRender]);  
+
+        // Player Two Win by Timeout
+        }else if (status == 8){
+          
+          index = 2;
+          if(pOne == accounts[0]) {
+            opponent = pTwo;
+            userGuess = rawPOneGuess;         
+            textEndgame = `Defeat! More than 24 hours have passed since\n your opponent's last move, he has requested a TimeOut Victory `;
+          }else{
+            opponent= pOne;
+            userGuess = rawPTwoGuess;
+            textEndgame = `Victory by TimeOut! ${betSize*2} Wei have been credited to your in-game balance `;             
+          }          
+            
+          let hexString = userGuess.slice(2, 2 + (wordLength*2));          
+          let guessString="";
+          for (let j =0; j< hexString.length; j= j+2){
+            
+            if (hexString[j]+ hexString[j+1]== "00"){
+             
+              guessString = guessString + " _ ";
+              
+            }else{
+               
+              let toConvert = `0x${hexString[j]}${hexString[j+1]}00000000000000000000000000000000000000000000000000000000000000`;             
+              guessString = guessString + web3.utils.hexToUtf8(toConvert).toUpperCase();
+              
+            }
+          }
+                    
+          let toRender=
+            <>                       
+              <p>Game ID: {id}  Bet Size: {betSize} Wei  VS: {opponent}</p>            
+              <p>your guess:  <h1>{guessString}</h1></p>
+              <h5>{textEndgame}</h5>
+            </>;
+    
+          arrayGames.push([index, id, toRender]);  
+          }
+      }          
     }
-    await loopGames();    
+    await loopGames();
+    console.log(arrayGames);
+    arrayGames.sort();    
+    console.log(arrayGames);
     this.setState({arrayGames:arrayGames});
 
     const reachebleGames = [];
@@ -358,7 +566,7 @@ class App extends Component {
                           arrayGames.map((b) =>                        
                           <tr><td>                                                     
                             <br></br>
-                              {b[1]}
+                              {b[2]}
                             <br></br>                                                                           
                          
                           </td></tr>
