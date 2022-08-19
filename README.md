@@ -40,7 +40,12 @@ Pour voir le front en local:
  cd client
  npm run start
 ```
-Sinon directement sur: https://hangsmans-versus-game.herokuapp.com//
+Sinon directement sur: https://hangsmans-versus-game.herokuapp.com// <br/>
+Assurez-vous d'être sur le réseau de test Rinkeby.
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureRinkeby.PNG)
+
+
 
 #### Test en cours d'écriture
 j'ai essayer longuement de faire les test en local avec les faux contrats vrf v2 coordinator de chainlink mais sans succès. j'ai donc repris de zéro avec une version du contrat sans chainlink 
