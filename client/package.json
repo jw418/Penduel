@@ -1,7 +1,10 @@
 {
   "name": "client",
   "version": "0.1.0",
-  "homepage": "https://jw418.github.io/DAPP-Systeme-vote/",
+  "homepage": "https://jw418.github.io/Penduel/",
+  "engines": {
+    "node": "16.14.2"
+  },
   "private": true,
   "dependencies": {
     "@openzeppelin/contracts": "^4.5.0",
