@@ -3,54 +3,35 @@
 pragma solidity 0.8.16;
 
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
-import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-
 
 /// @title Penduel
 /// @author jw418
-/// @notice Versus hangman's game 
+/// @notice Versus hangman's game  for test without CHAINLINK vrf v2
 /// @dev This contract can cointains exploit, deploy this contract on tesnet only!!
-contract Penduel is VRFConsumerBaseV2, Ownable {
-    VRFCoordinatorV2Interface COORDINATOR;
-
-    /* Chainlink's VRF V2  variables */
-    
-    uint16 requestConfirmations = 3;        // The default is 3, but you can set this higher.
-    uint32 callbackGasLimit = 200000;       
-    uint32 numWords =  1;                   // Number of random number at each request.
-    uint64  public s_subscriptionId;                // Your subscription ID for CHAINLINK   // 8023  
-    uint256[] public s_randomWords;         // For the FullFill Fct                   
-    address vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;   // Rinkeby coordinator 30 gwei Key Hash
-    bytes32 s_keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; // 30 gwei Key Hash
-     
-    bool public joinSessionFctOpen;
-    uint256 public totalCreatedSessions;
-    uint timeOut = 24 hours;     
+contract MockPenduel is Ownable {           
+        
     bytes32[] _words = [
         bytes32("hello"),bytes32("goodbye"),bytes32("sun"),
         bytes32("holliday"),bytes32("before"),bytes32("after"),
         bytes32("special")
-    ];      
-      
-
-    Sessions[] games;  // unused variable... to be deleted
-
+    ];     
+    bool public joinSessionFctOpen; 
+    uint256 public totalCreatedSessions;
+    uint public timeOut = 24 hours; 
+   
+   
     /* Mapping*/
-    mapping(uint256 => uint256) private reqId;                  //  associate a request with a game session
-    mapping(uint256 => uint256) private reqIdPublic; 
     mapping(uint256 => Sessions) private session;               //  mapping an uint(idSession) with a session 
     mapping(uint256 => SessionPublic) public sessionPublic;  
     mapping(address => uint256) public balance;                 //  gamers balances
     mapping(address => Player) playerGames;                     //  attached a gamer addres with his sessions
 
-    
     struct Sessions {
         bool playerOneFoundWord;
         bool playerTwoFoundWord;
         bool firstLetterRemplaced;
-        uint256 idSession;   
-        uint requestDate; 
+        uint256 idSession;
+        uint requestDate;           
         uint lastMoveDate;                         
         bytes32 word;        
     }
@@ -69,6 +50,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
 
     struct Player{
         uint256[] games;
+
     }
 
     enum StateSession {
@@ -83,37 +65,28 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         PTwoWinByTimeout
     } 
 
-    modifier onlyPlayer(uint256 idSession) {
+  modifier onlyPlayer(uint256 idSession) {
         require(msg.sender == sessionPublic[idSession].mustPlay, "is not your turn");
         _;
     }
 
+
     /* Events */
-    event PlayerWithdraw(address player, uint256 amount);   // change for playerWithdraw (no deployed)
+    event PlayerWithdraw(address player, uint256 amount);
     event Received(address indexed sender, uint256 amount);
     event SessionCreated(uint idSession, address playerOne, uint256 betSize);
-    event SessionJoined(uint idSession, address playerTwo);
-    event RNGRequested(uint256 indexed requestId, uint256 indexed idSession);
-    event RNGFound(uint256 indexed requestId);
-    event RandomWordsTaken(uint256[] randomWords);
+    event SessionJoined(uint idSession, address playerTwo);    
     event WordAdded();
     event HasPlayed(uint256 idSession, address player);
     event joinSessionFctPaused(bool paused);
-    
 
-  /* Constructor*/
-    /// @dev go to your chainlink account to see your subcription ID 
-    /// @dev when the contract is deployed do not forget to add this contract to your consumer
-    constructor(uint64 subscriptionId) VRFConsumerBaseV2(vrfCoordinator) {    
-        COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);       
-        s_subscriptionId = subscriptionId;
-    }
+  
 
     /* Allows this contract to receive payments */
     receive() external payable {
         emit Received(msg.sender, msg.value);
     }    
-    
+
     /// @notice a withdraw function for players
     function playerWithdraw() external {  
         uint toSend = balance[msg.sender];
@@ -123,18 +96,8 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         emit PlayerWithdraw(msg.sender, toSend); 
     }
 
-    /// @param idSession uint256 for identify the session
-    /// @notice if chainlink took too many times for given a rng the player can ask for a refund 
-    function refundRNGnotFound(uint256 idSession) external {
-        require(msg.sender == sessionPublic[idSession].playerOne || msg.sender == sessionPublic[idSession].playerTwo, "Error, Not your session");
-        require(session[idSession].word[0] == "","Error, RNG word already found"); 
-        require(block.timestamp > (session[idSession].requestDate + 3 hours), "Error, TimeOut Not Reached");        
-        sessionPublic[idSession].state = StateSession.Cancelled;
-        balance[sessionPublic[idSession].playerOne] += sessionPublic[idSession].betSize;
-        balance[sessionPublic[idSession].playerTwo] += sessionPublic[idSession].betSize;
-    }
-
-    /// @param idSession uint256 for identify the session
+    
+     /// @param idSession uint256 for identify the session
     /// @notice if the opponent player took too many times for playing you can ask for a win by TimeOut
     function requestWinTimeout(uint256 idSession) external {
         require(block.timestamp > (timeOut + session[idSession].lastMoveDate), "Error, TimeOut Not Reached");    
@@ -163,6 +126,9 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         balance[sessionPublic[idSession].playerOne] += sessionPublic[idSession].betSize;
     }
 
+
+
+
     /// @param word it is a bytes32
     /// @notice allows the owner to add words to the list for the game
     function addWord(bytes32 word) external onlyOwner {
@@ -170,7 +136,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         emit WordAdded();  
     }  
 
-    /// @dev first make sure that the contract has been added to the consumers on your chainlik subscription management page
+   
     /// @notice autorised players to use the joinSession Function     
     function openJoinSessionFct() external onlyOwner {
         require(joinSessionFctOpen == false,"Error, Already open");
@@ -178,14 +144,17 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         emit joinSessionFctPaused(false);  
     }   
 
-     
+
     /// @notice unautorised players to use the joinSession Function     
     function pausedJoinSessionFct() external onlyOwner {
         require(joinSessionFctOpen == true,"Error, Already paused");
         joinSessionFctOpen = false;
         emit joinSessionFctPaused(true);  
     }     
-   
+
+
+
+  
     /// @notice for create a new game session
     function createSession() external payable {
         require(msg.sender.balance>=msg.value, 'Error, insufficent vault balance');
@@ -205,62 +174,41 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
 
     /// @dev this function request for randomness
     /// @notice for join a session already created
-    function joinSession(uint256 idSession) external payable  returns (uint256 requestId){
+    function joinSession(uint256 idSession) payable public {
+        
         require(joinSessionFctOpen == true, 'Error, past RNGrequest not found');
         require(msg.sender != sessionPublic[idSession].playerOne, 'Error, already in this session');
         require(msg.sender.balance >= msg.value, 'Error, insufficent vault balance');
         require(msg.value >= sessionPublic[idSession].betSize, 'Error, insufficent vault balance');
-        require(sessionPublic[idSession].state == StateSession.Reachable, 'Error, session unreachable');     
-        
-        sessionPublic[idSession].playerTwo = payable(msg.sender);
-        session[idSession].requestDate = block.timestamp;        
-        sessionPublic[idSession].state = StateSession.InProgress;
-        joinSessionFctOpen = false;
-        requestId = COORDINATOR.requestRandomWords(
-            s_keyHash,
-            s_subscriptionId,
-            requestConfirmations,
-            callbackGasLimit,
-            numWords
-        );
-        reqId[requestId] = session[idSession].idSession;                // here we mapping request id with a session
-        reqIdPublic[requestId] = session[idSession].idSession;    // same here with the public part for the front-end 
-        emit RNGRequested(requestId, idSession);
-        sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
+        require(sessionPublic[idSession].state == StateSession.Reachable, 'Error, session unreachable');    
+       
         playerGames[msg.sender].games.push(idSession);
+        sessionPublic[idSession].playerTwo = payable(msg.sender);
+        session[idSession].lastMoveDate = block.timestamp;   // start timeout counter      
+        session[idSession].requestDate = block.timestamp;        
+        joinSessionFctOpen = false;
+
+        uint256 randNonce = 0;
+        randNonce++;
+        session[idSession].word = _words[uint (keccak256(abi.encodePacked(block.timestamp,block.difficulty,randNonce)))% _words.length];
+        sessionPublic[idSession].wordLegth = getSessionWordLength(idSession);
         emit SessionJoined(idSession, msg.sender);
-    }
-
-    /// @param requestId uint256 for identify the rng request
-    /// @param randomWords is a mandatory arry for this chainlink function
-    /// @dev The fulfillRandomWords function must not revert
-    /// @notice this function is call by the vrf coordinator and permit to attribute a rng word to the session
-    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal  override{
-        uint256 value = randomWords[0] % _words.length;
-        session[reqId[requestId]].word = _words[value];        
-        sessionPublic[reqIdPublic[requestId]].wordLegth = getSessionWordLength(reqId[requestId]); 
-        // emitting event to signal rng was founded
-        emit RNGFound(requestId);
-        emit RandomWordsTaken(randomWords);        
-        joinSessionFctOpen = true;
-
-        // here we remplaced the first letter     
-        if(session[reqId[requestId]].firstLetterRemplaced == false){
-            compareAndCopy(session[reqId[requestId]].word, session[reqId[requestId]].word[0], reqId[requestId]);
-            session[reqId[requestId]].firstLetterRemplaced = true;
+        
+        if(session[idSession].firstLetterRemplaced == false){
+            compareAndCopy(session[idSession].word, session[idSession].word[0], idSession);
+            session[idSession].firstLetterRemplaced = true;
         }
-        session[reqId[requestId]].lastMoveDate = block.timestamp;   // start timeout counter
-          // rng was founded so we can open the session       
-    }    
+        sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
+        sessionPublic[idSession].state = StateSession.InProgress;
+    }      
 
-    /// @param idSession uint256 for identify the session
+   /// @param idSession uint256 for identify the session
     /// @param letter played in bytes1      
     /// @notice the playing function of this dapp
     function play(bytes1 letter, uint256 idSession) external  onlyPlayer(idSession) {        
         require(isLetter(letter) == true, "Error, only lowercase letter"); 
         require(sessionPublic[idSession].state == StateSession.InProgress,"Error, session not in progress");
-        require(sessionPublic[idSession].playerTwo != address(0x0), "Error, await for a second player");
-        require(session[idSession].word[0] != "", "RNG word not already found");      
+        require(sessionPublic[idSession].playerTwo != address(0x0), "Error, await for a second player");           
       
         // when Player One plays
         if (msg.sender == sessionPublic[idSession].playerOne) {             
@@ -325,6 +273,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
            sessionPublic[idSession].playerTwoGuess = (~mask & sessionPublic[idSession].playerTwoGuess) | (bytes32(toInsert) >> (position * 8));
         }        
     }
+
 
     /// @param word to compare
     /// @param letter to check 

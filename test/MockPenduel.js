@@ -1,7 +1,7 @@
 // import des SC
 const MockPenduel = artifacts.require(`MockPenduel`);
 // import chai/test-helpers
-const { BN, expectRevert, expectEvent, balance, send, ether,} = require(`@openzeppelin/test-helpers`);
+const { BN, expectRevert, expectEvent, balance, send, ether, time} = require(`@openzeppelin/test-helpers`);
 const { expect } = require(`chai`);
 const constants = require('@openzeppelin/test-helpers/src/constants');
 
@@ -36,7 +36,7 @@ contract(`MockPenduel`, function (accounts) {
       );
     });
 
-    it(`${testCounter++}: timeOut must be equal to 10000`, async function () {
+    it(`${testCounter++}: timeOut must be equal to 24 hours`, async function () {
       const timeOut = await this.MockPenduelInstance.timeOut();
       await expect(timeOut).to.be.bignumber.equal(
         `86400`,
@@ -76,11 +76,15 @@ contract(`MockPenduel`, function (accounts) {
     });
 
     it(`${testCounter++}: Expect Revert minimun 1 wei`, async function () {      
-      await expectRevert(await this.MockPenduelInstance.createSession({from:  player1, value:0}), 'VM Exception while processing transaction: revert Error, minimum 1 WEIError')
+      await expectRevert(this.MockPenduelInstance.createSession({from:  player1, value:0}), `Error, minimum 1 WEI`)
     });
 
     it(`${testCounter++}: Expect Revert insufficent vault`, async function () {      
-      await expectRevert(await this.MockPenduelInstance.createSession({from:  player1, value: ether("9999999999999999")}), 'Error, insufficent vault balance')
+      await expectRevert(this.MockPenduelInstance.createSession({from:  player1, value: ether("9999999999999999")}), `Error, insufficent vault balance`)
+    });
+
+    it(`${testCounter++}: Expect Revert not your turn lowercase`, async function () {      
+      await expectRevert(this.MockPenduelInstance.play(`0x80`, 1, {from: player1}), `is not your turn`)
     });
     
    
