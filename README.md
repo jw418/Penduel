@@ -1,4 +1,4 @@
-# Penduel
+# Penduel  :crossed_swords:
 
 Jeu du Pendu en Duel, créer une partie avec la mise souhaitée ou rejoignez une partie, le vainqueur remporte le tout.
 DAPP réalisé dans le cadre de la formation développeur blockchain d'Alyra.
@@ -16,8 +16,8 @@ DAPP: https://hangsmans-versus-game.herokuapp.com/
 
 ## Installation 🛠️
 
-Pour notre Dapp nous avons utilisé React Truffle Box.
-Vous pouvez copiez notre repo avec la commande : 
+Pour ce projet de DAPP j'ai utilisé React Truffle Box.
+Vous pouvez copiez le repo avec la commande : 
 ```sh
 git clone https://github.com/jw418/Penduel.git
 ```
@@ -49,9 +49,9 @@ Assurez-vous d'être sur le réseau de test Rinkeby.
 
 # Tests(en cours d'écriture) :test_tube:
 
-Vous pouvez exécuter le scripts du  smart contract:
+Pour exécuter les test du smart contract:
 
-a la racine du projet tapez la commande:
+Allez à la racine du projet tapez la commande:
 ```sh
 truffle test ./test/MockPenduel.js
 ```
