@@ -32,8 +32,6 @@ https://trufflesuite.com/docs/truffle/reference/configuration/
 
 Puis si nécessaire à créer et à configurer votre fichier .ENV à la racine et l'ajouter à votre .gitignore.
 
-## Usage
-
 ## Front
 Pour voir le front en local:
 ```sh
@@ -51,7 +49,7 @@ Assurez-vous d'être sur le réseau de test Rinkeby.
 
 Pour exécuter les test du smart contract:
 
-Allez à la racine du projet tapez la commande:
+Allez à la racine du projet et tapez la commande:
 ```sh
 truffle test ./test/MockPenduel.js
 ```
