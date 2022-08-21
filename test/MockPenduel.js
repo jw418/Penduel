@@ -27,7 +27,7 @@ contract(`MockPenduel`, function (accounts) {
   });
 
   // on vérifie toutes les variables/constantes de notre contrat 
-  
+  describe('#### test variable ####', () => {
     it(`${testCounter++}: totalCreatedSessions must be equal to 0`, async function () {
       const totalCreatedSessions = await this.MockPenduelInstance.totalCreatedSessions();
       await expect(totalCreatedSessions).to.be.bignumber.equal(
@@ -52,9 +52,9 @@ contract(`MockPenduel`, function (accounts) {
         );
       });
     
+  })
 
-
-   // on vérifie toutes les variables/constantes de notre contrat 
+  describe('#### test change ####', () => {   
 
     
     it(`${testCounter++}: totalCreatedSessions must be equal to 1`, async function () {
@@ -86,7 +86,7 @@ contract(`MockPenduel`, function (accounts) {
     it(`${testCounter++}: Expect Revert not your turn lowercase`, async function () {      
       await expectRevert(this.MockPenduelInstance.play(`0x80`, 1, {from: player1}), `is not your turn`)
     });
-    
+  });  
    
    
    
