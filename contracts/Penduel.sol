@@ -32,10 +32,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         bytes32("holliday"),bytes32("before"),bytes32("after"),
         bytes32("special")
     ];      
-      
-
-    Sessions[] games;  // unused variable... to be deleted
-
+ 
     /* Mapping*/
     mapping(uint256 => uint256) private reqId;                  //  associate a request with a game session
     mapping(uint256 => uint256) private reqIdPublic; 
@@ -166,6 +163,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     /// @param word it is a bytes32
     /// @notice allows the owner to add words to the list for the game
     function addWord(bytes32 word) external onlyOwner {
+         require(isLowerCaseWord(word) == true, "Error, lowercase letters only");   // !! require non déployé
         _words.push(word);
         emit WordAdded();  
     }  
@@ -361,6 +359,19 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         if(!(b >= 0x61 && b<= 0x7A)) {  //a-z              
                 return false;
         }                
+        return true;
+    }  
+
+    /// !! fonction non-déployé
+    /// @param word bytes32 check if word is composed of lower case letters
+    /// @notice check if is a letter
+    function isLowerCaseWord(bytes32 word) private pure returns (bool) {     
+
+        for(uint8 i = 0; i < 32 && word[i] != 0; i++) {
+            if (isLetter(word[i]) == false) {
+                return false;
+            }           
+        }
         return true;
     }  
 }

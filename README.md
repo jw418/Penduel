@@ -47,8 +47,16 @@ Assurez-vous d'être sur le réseau de test Rinkeby.
 
 
 
-#### Test en cours d'écriture
-j'ai essayer longuement de faire les test en local avec les faux contrats vrf v2 coordinator de chainlink mais sans succès. j'ai donc repris de zéro avec une version du contrat sans chainlink 
+# Tests(en cours d'écriture) :test_tube:
+
+Vous pouvez exécuter le scripts du  smart contract:
+
+a la racine du projet tapez la commande:
+```sh
+truffle test ./test/MockPenduel.js
+```
+ 
+J'ai essayer la méthode décrite ici: https://betterprogramming.pub/how-to-mock-chainlink-vrf-coordinator-v2-and-aggregator-v3-with-truffle-0-8-0-24353b96858e pour faire les tests en local avec les faux contrats vrf v2 coordinator fourni par chainlink mais sans succès. J'ai donc repris de zéro avec une version du contrat sans chainlink.
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureTests.PNG)
 

@@ -45,7 +45,7 @@ contract(`MockPenduel`, function (accounts) {
     });
 
     it(`${testCounter++}: admin must be equal to owner`, async function () {
-        const admin = await this.MockPenduelInstance.admin();
+        const admin = await this.MockPenduelInstance.owner();
         await expect(admin).to.be.bignumber.equal(
           owner,
           `admin is not owner`
