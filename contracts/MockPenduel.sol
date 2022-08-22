@@ -201,7 +201,7 @@ contract MockPenduel is Ownable {
     /// @dev this function request for randomness
     /// @notice for join a session already created
     function joinSession(uint256 idSession) public payable {
-        require(joinSessionFctOpen == true, "Error, past RNGrequest not found");
+        require(joinSessionFctOpen == true, "join a session function is paused");
         require(
             msg.sender != sessionPublic[idSession].playerOne,
             "Error, already in this session"
@@ -212,7 +212,7 @@ contract MockPenduel is Ownable {
         );
         require(
             msg.value >= sessionPublic[idSession].betSize,
-            "Error, insufficent vault balance"
+            "Error, insufficent amount sent"
         );
         require(
             sessionPublic[idSession].state == StateSession.Reachable,
