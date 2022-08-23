@@ -93,7 +93,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
 
     /* Events */
     event PlayerWithdraw(address player, uint256 amount); // change for playerWithdraw (no deployed)
-    event Received(address indexed sender, uint256 amount);
+    // event Received(address indexed sender, uint256 amount);
     event SessionCreated(uint256 idSession, address playerOne, uint256 betSize);
     event SessionJoined(uint256 idSession, address playerTwo);
     event RNGRequested(uint256 indexed requestId, uint256 indexed idSession);
@@ -111,10 +111,10 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         s_subscriptionId = subscriptionId;
     }
 
-    /* Allows this contract to receive payments */
-    receive() external payable {
-        emit Received(msg.sender, msg.value);
-    }
+    // /* Allows this contract to receive payments */
+    // receive() external payable {
+    //     emit Received(msg.sender, msg.value);
+    // }
 
     /// @notice a withdraw function for players
     function playerWithdraw() external {
