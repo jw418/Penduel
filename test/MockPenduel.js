@@ -20,7 +20,6 @@ contract(`MockPenduel`, function (accounts) {
   const player2 = accounts[2];
   const notPlayer = accounts[8];
   const notOwner = accounts[9];
-  
 
   // variable qui permet de numéroter nos tests
   let testCounter = 1;
@@ -110,41 +109,50 @@ contract(`MockPenduel`, function (accounts) {
       });
     });
 
-    context("**** Test playerGames array ****", () => {
-      it(`${testCounter++}: owner games array must be empty`, async function () {
-        const arrayOwner = await this.MockPenduelInstance.getPlayerGames(owner);
-        await expect(arrayOwner).to.be.deep.equal([], `array not empty`);
-      });
+    context(
+      "**** Test playerGames array && getPlayerGames functions ****",
+      () => {
+        it(`${testCounter++}: owner games array must be empty`, async function () {
+          const arrayOwner = await this.MockPenduelInstance.getPlayerGames(
+            owner
+          );
+          await expect(arrayOwner).to.be.deep.equal([], `array not empty`);
+        });
 
-      it(`${testCounter++}: PlayerOne games array must be empty`, async function () {
-        const arrayP1 = await this.MockPenduelInstance.getPlayerGames(player1);
-        await expect(arrayP1).to.be.deep.equal([], `array not empty`);
-      });
+        it(`${testCounter++}: PlayerOne games array must be empty`, async function () {
+          const arrayP1 = await this.MockPenduelInstance.getPlayerGames(
+            player1
+          );
+          await expect(arrayP1).to.be.deep.equal([], `array not empty`);
+        });
 
-      it(`${testCounter++}: PlayerTwo games array must be empty`, async function () {
-        const arrayP2 = await this.MockPenduelInstance.getPlayerGames(player2);
-        await expect(arrayP2).to.be.deep.equal([], `array not empty`);
-      });
+        it(`${testCounter++}: PlayerTwo games array must be empty`, async function () {
+          const arrayP2 = await this.MockPenduelInstance.getPlayerGames(
+            player2
+          );
+          await expect(arrayP2).to.be.deep.equal([], `array not empty`);
+        });
 
-      it(`${testCounter++}: notPlayer games array must be empty`, async function () {
-        const arrayNotPlayer = await this.MockPenduelInstance.getPlayerGames(
-          notPlayer
-        );
-        await expect(arrayNotPlayer).to.be.deep.equal([], `array not empty`);
-      });
+        it(`${testCounter++}: notPlayer games array must be empty`, async function () {
+          const arrayNotPlayer = await this.MockPenduelInstance.getPlayerGames(
+            notPlayer
+          );
+          await expect(arrayNotPlayer).to.be.deep.equal([], `array not empty`);
+        });
 
-      it(`${testCounter++}: notOwner games array must be empty`, async function () {
-        const arrayNotOwner = await this.MockPenduelInstance.getPlayerGames(
-          notOwner
-        );
-        await expect(arrayNotOwner).to.be.deep.equal([], `array not empty`);
-      });
-    });
+        it(`${testCounter++}: notOwner games array must be empty`, async function () {
+          const arrayNotOwner = await this.MockPenduelInstance.getPlayerGames(
+            notOwner
+          );
+          await expect(arrayNotOwner).to.be.deep.equal([], `array not empty`);
+        });
+      }
+    );
 
     context("**** Test initial sessionPublic struct ****", () => {
       context("++++ Test sessionPublic 0 ++++", () => {
         beforeEach(async function () {
-          this.session0 = await this.MockPenduelInstance.sessionPublic(0);         
+          this.session0 = await this.MockPenduelInstance.sessionPublic(0);
         });
 
         it(`${testCounter++}: playerOne must be 0x00 address`, async function () {
@@ -206,7 +214,7 @@ contract(`MockPenduel`, function (accounts) {
 
       context("++++ Test sessionPublic 1 ++++", () => {
         beforeEach(async function () {
-          this.session1 = await this.MockPenduelInstance.sessionPublic(1);       
+          this.session1 = await this.MockPenduelInstance.sessionPublic(1);
         });
 
         it(`${testCounter++}: playerOne must be 0x00 address`, async function () {
@@ -281,14 +289,14 @@ contract(`MockPenduel`, function (accounts) {
         this.MockPenduelInstance.addWord(
           "0x686f6c6c69646179000000000000000000000000000000000000000000000000",
           { from: notOwner }
-          ),
-          "caller is not the owner"
-          );
-        });
-        
-        it(`${testCounter++}: should revert: not lower case word`, async function () {
-          await expectRevert(
-            this.MockPenduelInstance.addWord(
+        ),
+        "caller is not the owner"
+      );
+    });
+
+    it(`${testCounter++}: should revert: not lower case word`, async function () {
+      await expectRevert(
+        this.MockPenduelInstance.addWord(
           "0x41656c6c6f000000000000000000000000000000000000000000000000000000"
         ),
         "Error, lowercase letters only"
@@ -397,7 +405,6 @@ contract(`MockPenduel`, function (accounts) {
     });
 
     it(`${testCounter++}: should emit an event session created`, async function () {
-
       await expectEvent(
         await this.MockPenduelInstance.createSession({
           from: player1,
@@ -414,7 +421,7 @@ contract(`MockPenduel`, function (accounts) {
 
     context("**** Test struct change publicSession after creation ****", () => {
       beforeEach(async function () {
-        this.session1 = await this.MockPenduelInstance.sessionPublic(1);        
+        this.session1 = await this.MockPenduelInstance.sessionPublic(1);
       });
 
       it(`${testCounter++}: playerOne must be player1 address`, async function () {
@@ -484,12 +491,10 @@ contract(`MockPenduel`, function (accounts) {
       //   console.log(arrayP1[1][0]);
       //   await expect(arrayP1).to.be.bignumber.to.deep.equals([toString(1),toString(2)], `array not empty`);
       // });
-
     });
   });
 
-  context("#### Test cancelrequest function ####", () => {
-
+  context("#### Test cancelRequest  && playerWithdraw functions ####", () => {
     it(`${testCounter++}: totalCreatedSessions must be equal to 3`, async function () {
       await this.MockPenduelInstance.createSession({
         from: player1,
@@ -503,95 +508,98 @@ contract(`MockPenduel`, function (accounts) {
       );
     });
 
-    it(`${testCounter++}: should revert: Error, not your session`, async function () {       
-      await expectRevert(this.MockPenduelInstance.requestCancelGame(7,{from: player1}), `Error, not your session`);
+    it(`${testCounter++}: should revert: Error, not your session`, async function () {
+      await expectRevert(
+        this.MockPenduelInstance.requestCancelGame(7, { from: player1 }),
+        `Error, not your session`
+      );
     });
 
-
-    it(`${testCounter++}: should revert: session is not in reachable state`, async function () {  
-      await this.MockPenduelInstance.joinSession(1,{from: player2, value: betSize});
-      await expectRevert(this.MockPenduelInstance.requestCancelGame(1,{from: player1}), `session is not in reachable state `);
+    it(`${testCounter++}: should revert: session is not in reachable state`, async function () {
+      await this.MockPenduelInstance.joinSession(1, {
+        from: player2,
+        value: betSize,
+      });
+      await expectRevert(
+        this.MockPenduelInstance.requestCancelGame(1, { from: player1 }),
+        `session is not in reachable state `
+      );
     });
 
-    it(`${testCounter++}: should revert: Error, TimeOut Not Reached`, async function () {       
-      await expectRevert(this.MockPenduelInstance.requestCancelGame(2,{from: player1}), `Error, TimeOut Not Reached`);
+    it(`${testCounter++}: should revert: Error, TimeOut Not Reached`, async function () {
+      await expectRevert(
+        this.MockPenduelInstance.requestCancelGame(2, { from: player1 }),
+        `Error, TimeOut Not Reached`
+      );
     });
 
-    it(`${testCounter++}: session 2 must be in cancelled state`, async function () { 
+    it(`${testCounter++}: session 2 must be in cancelled state`, async function () {
       const timeOut = (await time.latest()).add(time.duration.hours(24));
-      await time.increaseTo(timeOut.add(time.duration.minutes(1))); 
-      await this.MockPenduelInstance.requestCancelGame(2,{from: player1});
-      const stateSession2 = await this.MockPenduelInstance.sessionPublic(2);       
-      await expect(stateSession2.state).to.be.bignumber.equal("6", "session 2 is not cancelled");
+      await time.increaseTo(timeOut.add(time.duration.minutes(1)));
+      await this.MockPenduelInstance.requestCancelGame(2, { from: player1 });
+      const stateSession2 = await this.MockPenduelInstance.sessionPublic(2);
+      await expect(stateSession2.state).to.be.bignumber.equal(
+        "6",
+        "session 2 is not cancelled"
+      );
     });
 
-    it(`${testCounter++}: player1 in-game balance must be equal to betsize`, async function () {      
+    it(`${testCounter++}: player1 in-game balance must be equal to betsize`, async function () {
       const balanceInGame = await this.MockPenduelInstance.balance(player1);
       this.balanceEthPlayer1 = await balance.tracker(player1);
-      console.log("531" + this.balance);     
-      await expect(balanceInGame).to.be.bignumber.equal(betSize, "in-game balance is not equal to betSize");
+      console.log("531" + this.balance);
+      await expect(balanceInGame).to.be.bignumber.equal(
+        betSize,
+        "in-game balance is not equal to betSize"
+      );
     });
 
-    it(`${testCounter++}: expect after withdraw player1 in-game balance must be equal to zero`, async function () {      
-      await this.MockPenduelInstance.playerWithdraw({from: player1});      
-      const balanceInGame = await this.MockPenduelInstance.balance(player1);         
-      await expect(balanceInGame).to.be.bignumber.equal("0", "in-game balance is not equal to zero");
+    it(`${testCounter++}: expect after withdraw player1 in-game balance must be equal to zero`, async function () {
+      await this.MockPenduelInstance.playerWithdraw({ from: player1 });
+      const balanceInGame = await this.MockPenduelInstance.balance(player1);
+      await expect(balanceInGame).to.be.bignumber.equal(
+        "0",
+        "in-game balance is not equal to zero"
+      );
     });
 
-    it(`${testCounter++}: expect after withdraw player1 eth balance must be change`, async function () {      
+    it(`${testCounter++}: expect after withdraw player1 eth balance must be change`, async function () {
       const delta = await this.balanceEthPlayer1.delta();
       const stringDelta = delta.toString();
       const fees = 419340000000000;
-      const stringExpect = (betSize-fees).toString();   
-      await expect(stringDelta).to.be.equal(stringExpect, "balance not corectly change");
-    });
-
-
-    
-
-
-    
-
-   
-
-  });
-
-  context("#### Test JoinSession function ####", () => {
-
-    it(`${testCounter++}: Expect Revert join a session function is paused`, async function () {
-      await expectRevert(
-        this.MockPenduelInstance.joinSession( 1, { from: player1 }),
-        `join a session function is paused`
+      const stringExpect = (betSize - fees).toString();
+      await expect(stringDelta).to.be.equal(
+        stringExpect,
+        "balance not corectly change"
       );
     });
+  });
+
+  context(
+    "#### Test JoinSession && getSessionWordLength && compareAndCopy functions ####",
+    () => {
+      it(`${testCounter++}: Expect Revert join a session function is paused`, async function () {
+        await expectRevert(
+          this.MockPenduelInstance.joinSession(1, { from: player1 }),
+          `join a session function is paused`
+        );
+      });
+    }
+  );
+
+  context("#### Test requestVictoryTimeOut function ####", () => {
     
   });
 
-  context("#### Test play function ####", () => {
-
-    it(`${testCounter++}: Expect Revert not your turn`, async function () {
-      await expectRevert(
-        this.MockPenduelInstance.play(`0x80`, 1, { from: player1 }),
-        `is not your turn`
-      );
-    });
-
-  });    
-
-  context("#### Test getSessionWordLength function ####", () => {}); // private
-
-  context("#### Test compareAndCopy function ####", () => {}); // private
-
-  context("#### Test isLetter function ####", () => {}); // private
-
-  context("#### Test isLowerCaseWord function ####", () => {}); // private
-
-  context("#### Test replaceByteAtIndex function ####", () => {}); // private-
-
-
- 
-
-  context("#### Test requestVictoryTimeOut function ####", () => {}); 
-
-  context("#### Test playerWithdraw function ####", () => {});
+  context(
+    "#### Test play  && isLetter && replaceByteAtIndex functions ####",
+    () => {
+      it(`${testCounter++}: Expect Revert not your turn`, async function () {
+        await expectRevert(
+          this.MockPenduelInstance.play(`0x80`, 1, { from: player1 }),
+          `is not your turn`
+        );
+      });
+    }
+  );
 });
