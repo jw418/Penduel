@@ -538,14 +538,12 @@ contract(`MockPenduel`, function (accounts) {
       await expect(balanceInGame).to.be.bignumber.equal("0", "in-game balance is not equal to zero");
     });
 
-    it(`${testCounter++}: expect after withdraw player1 eth balance must be change`, async function () {  
-      console.log("542" + this.balanceEthPlayer1);
+    it(`${testCounter++}: expect after withdraw player1 eth balance must be change`, async function () {      
       const delta = await this.balanceEthPlayer1.delta();
       const stringDelta = delta.toString();
       const fees = 419340000000000;
-      const stringExpect = (betSize-fees).toString();                          
-      console.log("544" + delta);
-      await expect(stringDelta).to.be.equal(stringExpect, "in-game balance is not equal to zero");
+      const stringExpect = (betSize-fees).toString();   
+      await expect(stringDelta).to.be.equal(stringExpect, "balance not corectly change");
     });
 
 
