@@ -10,13 +10,11 @@ import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 /// @dev This contract can cointains exploit, deploy this contract on tesnet only!!
 contract MockPenduel is Ownable {
     bytes32[] _words = [
-        bytes32("hello"),
-        bytes32("goodbye"),
         bytes32("sun"),
-        bytes32("holliday"),
-        bytes32("before"),
+        bytes32("kiss"),
         bytes32("after"),
-        bytes32("special")
+        bytes32("before"),
+        bytes32("goodbye")               
     ];
     bool public joinSessionFctOpen;
     uint256 public totalCreatedSessions;
@@ -214,6 +212,7 @@ contract MockPenduel is Ownable {
             "Error, session unreachable"
         );
 
+        sessionPublic[idSession].state = StateSession.InProgress;
         playerGames[msg.sender].games.push(idSession);
         sessionPublic[idSession].playerTwo = payable(msg.sender);
         session[idSession].lastMoveDate = block.timestamp; // start timeout counter
@@ -245,7 +244,6 @@ contract MockPenduel is Ownable {
             session[idSession].firstLetterRemplaced = true;
         }
         sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
-        sessionPublic[idSession].state = StateSession.InProgress;
     }
 
     /// @param idSession uint256 for identify the session
