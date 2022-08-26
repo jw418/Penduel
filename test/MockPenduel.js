@@ -479,12 +479,13 @@ contract(`MockPenduel`, function (accounts) {
         );
       });
 
-      // it(`${testCounter++}: PlayerOne games array must be [1,2]`, async function () {
+      // it(`${testCounter++}: PlayerOne games array lenght must be 2`, async function () {
       //   const arrayP1 = await this.MockPenduelInstance.getPlayerGames(player1);
       //   console.log(arrayP1);
+
       //   const values = Object.values(arrayP1);
       //   console.log(values);     
-      //   await expect(arrayP1).to.be.bignumber.to.deep.equals([toString(1),toString(2)], `array not empty`);
+      //   await expect(values.lenght).to.be.bignumber.equal('2', `array not empty`);
       // });
     });
   });
@@ -541,7 +542,7 @@ contract(`MockPenduel`, function (accounts) {
 
     it(`${testCounter++}: player1 in-game balance must be equal to betsize`, async function () {
       const balanceInGame = await this.MockPenduelInstance.balance(player1);
-      this.balanceEthPlayer1 = await balance.tracker(player1); 
+      this.balanceEthPlayer1 = await balance.tracker(player1);          
       await expect(balanceInGame).to.be.bignumber.equal(
         betSize,
         "in-game balance is not equal to betSize"
@@ -696,13 +697,15 @@ contract(`MockPenduel`, function (accounts) {
           );
         });
 
-        //
+        
         // it(`${testCounter++}: PlayerTwo games array must be [1,3]`, async function () {
         //   const arrayP2 = await this.MockPenduelInstance.getPlayerGames(player2);
         //   console.log(arrayP2);
         //   const values = Object.values(arrayP2);
+        //   const one = 1;
+        //   const three = 3;
         //   console.log(values);     
-        //   await expect(arrayP2).to.be.bignumber.to.deep.equals([toString(1),toString(3)], `array not empty`);
+        //   await expect(arrayP2).to.be.bignumber.equal([one.toFixed(), three.toFixed()], `array not empty`);
         // });
 
       });
@@ -710,22 +713,61 @@ contract(`MockPenduel`, function (accounts) {
     }
   );
 
-  // ok revert: ok already in this session, ok insufficent balance, ok insufficent amount sent , ok good state 
-  // ok getword lenght  ok compare and copy
-  // ok state must be in progress
-  // ok must play shoul be p2
-  // ok word lenght!= 0
-  // ok first letter should be change p1 && p2
-  // ok should emit an event
-  
-  // ok mais test ne compare pas corectement les arrays
-  //     session corectly push in array playergames
-  
-  
-  // player move // last date must be change test time out
 
   context("#### Test requestVictoryTimeOut function ####", () => {
-    
+
+    it(`${testCounter++}: Expect Revert: Error, TimeOut Not Reached`, async function () {
+        
+      await expectRevert(
+        this.MockPenduelInstance.requestWinTimeout(3,{
+          from: player1
+        }),
+        `Error, TimeOut Not Reached`
+      );
+    });
+
+    it(`${testCounter++}: Expect Revert: opponent has played OR not your session (not a player)`, async function () {
+      const timeOut = (await time.latest()).add(time.duration.hours(24));
+      await time.increaseTo(timeOut.add(time.duration.minutes(1)));  
+      await expectRevert(
+        this.MockPenduelInstance.requestWinTimeout(3,{
+          from: notPlayer
+        }),
+        `opponent has played OR not your session`
+      );
+    });
+
+  
+    it(`${testCounter++}: Expect Revert: Error, session is not in progress`, async function () {  
+      await this.MockPenduelInstance.createSession({from: player1, value: betSize});
+      const timeOut = (await time.latest()).add(time.duration.hours(24));
+      await time.increaseTo(timeOut.add(time.duration.minutes(1)));      
+      await expectRevert(
+        this.MockPenduelInstance.requestWinTimeout(4,{
+          from: player1
+        }),
+        `Error, session is not in progress`
+      );
+    });
+
+    it(`${testCounter++}: session 4 state must be 7 (victory p1 by timeout session)`, async function () { 
+      await this.MockPenduelInstance.joinSession(4,{from: player2, value: betSize});
+      const timeOut = (await time.latest()).add(time.duration.hours(24));
+      await time.increaseTo(timeOut.add(time.duration.minutes(1)));
+      await this.MockPenduelInstance.requestWinTimeout(4,{
+        from: player1
+      }) 
+      const session4 = await this.MockPenduelInstance.sessionPublic(4);
+      const state = session4.state;      
+      await expect(state).to.be.bignumber.equal("7", "state is not equal to 7");      
+    });
+
+    it(`${testCounter++}: Player One in-game balance must be equal to betSize x 2`, async function () {  
+      const inGameBalanceP1 = await this.MockPenduelInstance.balance(player1);
+      const expectedBalance = betSize * 2; 
+      await expect(inGameBalanceP1).to.be.bignumber.equal(expectedBalance.toFixed(), "balance is not equal to betsize x 2");      
+    })  
+
   });
 
   context(
@@ -733,10 +775,22 @@ contract(`MockPenduel`, function (accounts) {
     () => {
       it(`${testCounter++}: Expect Revert not your turn`, async function () {
         await expectRevert(
-          this.MockPenduelInstance.play(`0x80`, 1, { from: player1 }),
+          this.MockPenduelInstance.play(`0x62`, 1, { from: player1 }),
           `is not your turn`
         );
       });
+
+      it(`${testCounter++}: Expect Revert: Error, only lowercase letter`, async function () {
+        await this.MockPenduelInstance.createSession({from: player1, value: betSize});
+        await this.MockPenduelInstance.joinSession(5, {from: player2, value: betSize});
+        await expectRevert(
+          this.MockPenduelInstance.play(`0x80`, 5, { from: player2 }),
+          `Error, only lowercase letter`
+        );
+      });
+
+     
+
     }
   );
 });
