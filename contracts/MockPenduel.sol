@@ -215,9 +215,7 @@ contract MockPenduel is Ownable {
         sessionPublic[idSession].state = StateSession.InProgress;
         playerGames[msg.sender].games.push(idSession);
         sessionPublic[idSession].playerTwo = payable(msg.sender);
-        session[idSession].lastMoveDate = block.timestamp; // start timeout counter
-        session[idSession].requestDate = block.timestamp;
-        joinSessionFctOpen = false;
+        session[idSession].lastMoveDate = block.timestamp; // start timeout counter     
 
         uint256 randNonce = 0;
         randNonce++;
