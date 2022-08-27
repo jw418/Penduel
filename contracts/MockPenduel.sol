@@ -10,11 +10,7 @@ import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 /// @dev This contract can cointains exploit, deploy this contract on tesnet only!!
 contract MockPenduel is Ownable {
     bytes32[] _words = [
-        bytes32("sun"),
-        bytes32("kiss"),
-        bytes32("after"),
-        bytes32("before"),
-        bytes32("goodbye")               
+        bytes32("sun")                            
     ];
     bool public joinSessionFctOpen;
     uint256 public totalCreatedSessions;
@@ -305,7 +301,7 @@ contract MockPenduel is Ownable {
             }
         }
 
-        // when Player One plays
+        // when Player two plays
         if (msg.sender == sessionPublic[idSession].playerTwo) {
             compareAndCopy(session[idSession].word, letter, idSession);
             sessionPublic[idSession].mustPlay = sessionPublic[idSession]

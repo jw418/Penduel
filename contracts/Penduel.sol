@@ -387,7 +387,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             }
         }
 
-        // when Player One plays
+        // when Player Two plays
         if (msg.sender == sessionPublic[idSession].playerTwo) {
             compareAndCopy(session[idSession].word, letter, idSession);
             sessionPublic[idSession].mustPlay = sessionPublic[idSession]
