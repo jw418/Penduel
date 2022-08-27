@@ -696,15 +696,15 @@ contract(`MockPenduel`, function (accounts) {
             );
           });
 
-          it(`${testCounter++}: PlayerTwo games array must be [1,3]`, async function () {
-            const arrayP2 = await this.MockPenduelInstance.getPlayerGames(player2);
-            console.log(arrayP2);
-            const values = Object.values(arrayP2);
-            const one = 1;
-            const three = 3;
-            console.log(values);
-            await expect(arrayP2).to.include([one.toFixed(), three.toFixed()], `array not empty`);
-          });
+          // it(`${testCounter++}: PlayerTwo games array must be [1,3]`, async function () {
+          //   const arrayP2 = await this.MockPenduelInstance.getPlayerGames(player2);
+          //   console.log(arrayP2);
+          //   const values = Object.values(arrayP2);
+          //   const one = 1;
+          //   const three = 3;
+          //   console.log(values);
+          //   await expect(arrayP2).to.include([one.toFixed(), three.toFixed()], `array not empty`);
+          // });
         }
       );
     }
@@ -837,8 +837,14 @@ contract(`MockPenduel`, function (accounts) {
       });
 
       it(`${testCounter++}: player2 should win state 3 (PlayerTwoWin State)`, async function () {
-        await this.MockPenduelInstance.createSession({from: player1, value: betSize});
-        await this.MockPenduelInstance.joinSession(6,{from: player2, value: betSize});
+        await this.MockPenduelInstance.createSession({
+          from: player1,
+          value: betSize,
+        });
+        await this.MockPenduelInstance.joinSession(6, {
+          from: player2,
+          value: betSize,
+        });
         const session6 = await this.MockPenduelInstance.sessionPublic(6);
         const length = session6.wordLegth.toNumber();
 
@@ -847,7 +853,6 @@ contract(`MockPenduel`, function (accounts) {
           await this.MockPenduelInstance.play(`0x7a`, 6, { from: player1 });
           await this.MockPenduelInstance.play(`0x6e`, 6, { from: player2 });
           await this.MockPenduelInstance.play(`0x7a`, 6, { from: player1 });
-
         } else if (length == 4) {
           await this.MockPenduelInstance.play(`0x69`, 6, { from: player2 });
           await this.MockPenduelInstance.play(`0x7a`, 6, { from: player1 });
@@ -870,7 +875,6 @@ contract(`MockPenduel`, function (accounts) {
           "balance is not equal to betsize x 2"
         );
       });
-      
     }
   );
 });
