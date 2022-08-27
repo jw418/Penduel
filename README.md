@@ -45,7 +45,7 @@ Assurez-vous d'être sur le réseau de test Rinkeby.
 
 
 
-# Tests(en cours d'écriture) :test_tube:
+# Tests :test_tube:
 
 Pour exécuter les test du smart contract:
 
