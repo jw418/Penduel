@@ -875,6 +875,56 @@ contract(`MockPenduel`, function (accounts) {
           "balance is not equal to betsize x 2"
         );
       });
+
+      it(`${testCounter++}: state should be state 5 (Draw State)`, async function () {
+        await this.MockPenduelInstance.createSession({
+          from: player1,
+          value: betSize,
+        });
+        await this.MockPenduelInstance.joinSession(7, {
+          from: player2,
+          value: betSize,
+        });
+        const session7 = await this.MockPenduelInstance.sessionPublic(7);
+        const length = session7.wordLegth.toNumber();
+
+        if (length == 3) {
+          await this.MockPenduelInstance.play(`0x75`, 7, { from: player2 });
+          await this.MockPenduelInstance.play(`0x75`, 7, { from: player1 });
+          await this.MockPenduelInstance.play(`0x6e`, 7, { from: player2 });
+          await this.MockPenduelInstance.play(`0x6e`, 7, { from: player1 });
+        } else if (length == 4) {
+          await this.MockPenduelInstance.play(`0x69`, 7, { from: player2 });
+          await this.MockPenduelInstance.play(`0x69`, 7, { from: player1 });
+          await this.MockPenduelInstance.play(`0x73`, 7, { from: player2 });
+          await this.MockPenduelInstance.play(`0x73`, 7, { from: player1 });
+        } else {
+          console.log("error!!");
+        }
+
+        const session7Bis = await this.MockPenduelInstance.sessionPublic(7);
+        const stateS7 = session7Bis.state;
+        await expect(stateS7).to.be.bignumber.equal(`5`, "state is not 5");
+      });
+
+      it(`${testCounter++}: Player Two in-game balance must be equal to betSize x 3`, async function () {
+        const inGameBalanceP2 = await this.MockPenduelInstance.balance(player2);
+        const expectedBalance = betSize * 3;
+        await expect(inGameBalanceP2).to.be.bignumber.equal(
+          expectedBalance.toFixed(),
+          "balance is not equal to betsize x 3"
+        );
+      });
+
+      it(`${testCounter++}: Player One in-game balance must be equal to betSize x 5`, async function () {
+        const inGameBalanceP1 = await this.MockPenduelInstance.balance(player1);
+        const expectedBalance = betSize * 5;
+        await expect(inGameBalanceP1).to.be.bignumber.equal(
+          expectedBalance.toFixed(),
+          "balance is not equal to betsize x 5"
+        );
+      });
+
     }
   );
 });
