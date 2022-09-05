@@ -66,6 +66,8 @@ Outil qui met en évidence certaines vulnérabilités.
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_1.PNG)
 _ rng volontairement dans le contract<br/>
 _ ignoré: varaiable utilisé comme indiqué par chainlink<br/>
+<br/>
+
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_2.PNG)
 Reetrency: ligne 280 l'etat de la session est changé<
 ```sh
@@ -81,36 +83,47 @@ Reetrency: ligne 280 l'etat de la session est changé<
 <br/>
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_3.PNG)
 Ignoré<br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_4.PNG)
 Reentrency pas possible grace au require, si la fonction s'exécute partiellement cela n'afffectera que l'utilisateur qui apelle la fonction(il ne pourra pas jouer et le jouer 1 pourra demander un remboursement). Cependant dans le cas ou l'utilisateur n'est pas malicieux et que la fonction ne s'exécute pas complétement il pourrait alors être lésé.<br/>
 
 Action: déplacé l'appelle de la fonction requestRandomWords() en fin de fonction, dans ce cas si la fonction est interrompue avant la fin aucun mot ne sera générer et apres 3h les joueurs pourront demander a ce que la partie soit annulé &&  "sessionPublic[idSession].state = StateSession.InProgress;" placé juste après les require.<br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_5.PNG)
 Ignoré: un require revert la fonction  si nécéssaire <br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_6.PNG)
 Ignoré: même en cas de manipulation c'est comparaison n'ont pas besoin d'une grande précisions<br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_7.PNG)
 Action: suppression des égalités<br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_8.PNG)
 Ignoré<br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_9.PNG)
 Ignoré: require en fin de fonction qui vérifie l'exécution<br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_10.PNG)>
 Ignoré: pour les mixedCase (pas pertinent)<br/>
 Action: Event name modifié <br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_11.PNG)
 Action: uint32 callbackGasLimit = 200000; ==> uint32 callbackGasLimit = 2 * (10**5);<br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_12.PNG)
 Action: ajout de l'attribut constant<br/>
+<br/>
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_13.PNG)
 Action: dans MockPenduel.sol pour la fonction joinSession() passé de public a external<br/>
+<br/>
