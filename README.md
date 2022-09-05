@@ -1,4 +1,4 @@
-# Penduel  :crossed_swords:
+ # Penduel  :crossed_swords:
 
 Jeu du Pendu en Duel, créer une partie avec la mise souhaitée ou rejoignez une partie, le vainqueur remporte le tout.
 DAPP réalisé dans le cadre de la formation développeur blockchain d'Alyra.
@@ -59,6 +59,57 @@ truffle test ./test/MockPenduel.js
 
 J'ai essayer la méthode décrite ici: https://betterprogramming.pub/how-to-mock-chainlink-vrf-coordinator-v2-and-aggregator-v3-with-truffle-0-8-0-24353b96858e pour faire les tests en local avec les faux contrats vrf v2 coordinator fourni par chainlink mais sans succès. J'ai donc repris de zéro avec une version du contrat sans chainlink.
 
+# Slither
 
+Outil qui met en évidence certaines vulnérabilités.
 
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_1.PNG)
+_ rng volontairement dans le contract
+_ ignoré: varaiable utilisé comme indiqué par chainlink
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_2.PNG)
+Reetrency: ligne 280 l'etat de la session est changé
+```sh
+ sessionPublic[idSession].state = StateSession.InProgress;
+ ```
+ en cas de reentrency le require ligne 273 empeche l'execution de la fonction:
+ ```sh
+  require(
+            sessionPublic[idSession].state == StateSession.Reachable,
+            "Error, session unreachable"
+        );
+```        
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_3.PNG)
+Ignoré
 
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_4.PNG)
+Reentrency pas possible grace au require, si la fonction s'exécute partiellement cela n'afffectera que l'utilisateur qui apelle la fonction(il ne pourra pas jouer et le jouer 1 pourra demander un remboursement). Cependant dans le cas ou l'utilisateur n'est pas malicieux et que la fonction ne s'exécute pas complétement il pourrait alors être lésé.
+
+Action: déplacé l'appelle de la fonction requestRandomWords() en fin de fonction, dans ce cas si la fonction est interrompue avant la fin aucun mot ne sera générer et apres 3h les joueurs pourront demander a ce que la partie soit annulé &&  "sessionPublic[idSession].state = StateSession.InProgress;" placé juste après les require.
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_5.PNG)
+Ignoré: un require revert la fonction  si nécéssaire 
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_6.PNG)
+Ignoré: même en cas de manipulation c'est comparaison n'ont pas besoin d'une grande précisions
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_7.PNG)
+Action: suppression des égalités
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_8.PNG)
+Ignoré
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_9.PNG)
+Ignoré: require en fin de fonction qui vérifie l'exécution
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_10.PNG)
+Ignoré: pour les mixedCase (pas pertinent)
+Action: Event name modifié 
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_11.PNG)
+Action: uint32 callbackGasLimit = 200000; ==> uint32 callbackGasLimit = 2 * (10**5);
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_12.PNG)
+Action: ajout de l'attribut constant
+
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_13.PNG)
+Action: dans MockPenduel.sol pour la fonction joinSession() passé de public a external

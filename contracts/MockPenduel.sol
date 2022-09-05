@@ -14,7 +14,7 @@ contract MockPenduel is Ownable {
     ];
     bool public joinSessionFctOpen;
     uint256 public totalCreatedSessions;
-    uint256 public timeOut = 24 hours;
+    uint256 constant public timeOut = 24 hours;
 
     /* Mapping*/
     mapping(uint256 => Sessions) private session; //  mapping an uint(idSession) with a session
@@ -74,7 +74,7 @@ contract MockPenduel is Ownable {
     event SessionJoined(uint256 idSession, address playerTwo);
     event WordAdded();
     event HasPlayed(uint256 idSession, address player);
-    event joinSessionFctPaused(bool paused);
+    event JoinSessionFctPaused(bool paused);
 
     
     /// @notice a withdraw function for players
@@ -148,23 +148,23 @@ contract MockPenduel is Ownable {
     /// @param word it is a bytes32
     /// @notice allows the owner to add words to the list for the game
     function addWord(bytes32 word) external onlyOwner {
-        require(isLowerCaseWord(word) == true, "Error, lowercase letters only");
+        require(isLowerCaseWord(word), "Error, lowercase letters only");
         _words.push(word);
         emit WordAdded();
     }
 
     /// @notice autorised players to use the joinSession Function
     function openJoinSessionFct() external onlyOwner {
-        require(joinSessionFctOpen == false, "Error, Already open");
+        require(!joinSessionFctOpen, "Error, Already open");
         joinSessionFctOpen = true;
-        emit joinSessionFctPaused(false);
+        emit JoinSessionFctPaused(false);
     }
 
     /// @notice unautorised players to use the joinSession Function
     function pausedJoinSessionFct() external onlyOwner {
-        require(joinSessionFctOpen == true, "Error, Already paused");
+        require(joinSessionFctOpen, "Error, Already paused");
         joinSessionFctOpen = false;
-        emit joinSessionFctPaused(true);
+        emit JoinSessionFctPaused(true);
     }
 
     /// @notice for create a new game session
@@ -189,8 +189,8 @@ contract MockPenduel is Ownable {
 
     /// @dev this function request for randomness
     /// @notice for join a session already created
-    function joinSession(uint256 idSession) public payable {
-        require(joinSessionFctOpen == true, "join a session function is paused");
+    function joinSession(uint256 idSession) external payable {
+        require(joinSessionFctOpen, "join a session function is paused");
         require(
             msg.sender != sessionPublic[idSession].playerOne,
             "Error, already in this session"
@@ -229,7 +229,7 @@ contract MockPenduel is Ownable {
         sessionPublic[idSession].wordLegth = getSessionWordLength(idSession);
         emit SessionJoined(idSession, msg.sender);
 
-        if (session[idSession].firstLetterRemplaced == false) {
+        if (!session[idSession].firstLetterRemplaced) {
             compareAndCopy(
                 session[idSession].word,
                 session[idSession].word[0],
@@ -247,7 +247,7 @@ contract MockPenduel is Ownable {
         external
         onlyPlayer(idSession)
     {
-        require(isLetter(letter) == true, "Error, only lowercase letter");
+        require(isLetter(letter), "Error, only lowercase letter");
         require(
             sessionPublic[idSession].state == StateSession.InProgress,
             "Error, session not in progress"
@@ -272,7 +272,7 @@ contract MockPenduel is Ownable {
             ) {
                 session[idSession].playerOneFoundWord = true;
                 // Draw
-                if (session[idSession].playerTwoFoundWord == true) {
+                if (session[idSession].playerTwoFoundWord) {
                     sessionPublic[idSession].state = StateSession.Draw;
                     balance[
                         sessionPublic[idSession].playerOne
@@ -282,7 +282,7 @@ contract MockPenduel is Ownable {
                     ] += sessionPublic[idSession].betSize;
                 }
                 // Player one Win
-                if (session[idSession].playerTwoFoundWord == false) {
+                if (!session[idSession].playerTwoFoundWord) {
                     sessionPublic[idSession].state = StateSession.PlayerOneWin;
                     balance[sessionPublic[idSession].playerOne] +=
                         sessionPublic[idSession].betSize *
@@ -291,8 +291,8 @@ contract MockPenduel is Ownable {
             }
             // Player Two Win: Player Two find the word and player not found it
             if (
-                session[idSession].playerTwoFoundWord == true &&
-                (session[idSession].playerOneFoundWord == false)
+                session[idSession].playerTwoFoundWord &&
+                (!session[idSession].playerOneFoundWord)
             ) {
                 sessionPublic[idSession].state = StateSession.PlayerTwoWin;
                 balance[sessionPublic[idSession].playerTwo] +=
@@ -331,7 +331,7 @@ contract MockPenduel is Ownable {
         bytes1 maskBytes = 0xff;
         bytes32 mask = bytes32(maskBytes) >> (position * 8);
 
-        if (session[idSession].firstLetterRemplaced == false) {
+        if (!session[idSession].firstLetterRemplaced) {
             sessionPublic[idSession].playerOneGuess =
                 (~mask & sessionPublic[idSession].playerOneGuess) |
                 (bytes32(toInsert) >> (position * 8));
@@ -343,7 +343,7 @@ contract MockPenduel is Ownable {
         if (
             sessionPublic[idSession].mustPlay ==
             sessionPublic[idSession].playerOne &&
-            session[idSession].firstLetterRemplaced == true
+            session[idSession].firstLetterRemplaced
         ) {
             sessionPublic[idSession].playerOneGuess =
                 (~mask & sessionPublic[idSession].playerOneGuess) |
@@ -352,7 +352,7 @@ contract MockPenduel is Ownable {
         if (
             sessionPublic[idSession].mustPlay ==
             sessionPublic[idSession].playerTwo &&
-            session[idSession].firstLetterRemplaced == true
+            session[idSession].firstLetterRemplaced
         ) {
             sessionPublic[idSession].playerTwoGuess =
                 (~mask & sessionPublic[idSession].playerTwoGuess) |
@@ -419,7 +419,7 @@ contract MockPenduel is Ownable {
     /// @notice check if is a letter
     function isLowerCaseWord(bytes32 word) private pure returns (bool) {
         for (uint8 i = 0; i < 32 && word[i] != 0; i++) {
-            if (isLetter(word[i]) == false) {
+            if (!isLetter(word[i])) {
                 return false;
             }
         }

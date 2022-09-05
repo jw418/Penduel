@@ -15,18 +15,18 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
 
     /* Chainlink's VRF V2  variables */
 
-    uint16 requestConfirmations = 3; // The default is 3, but you can set this higher.
-    uint32 callbackGasLimit = 200000;
-    uint32 numWords = 1; // Number of random number at each request.
+    uint16 constant requestConfirmations = 3; // The default is 3, but you can set this higher.
+    uint32 constant callbackGasLimit = 2 * (10**5);
+    uint32 constant numWords = 1; // Number of random number at each request.
     uint64 public s_subscriptionId; // Your subscription ID for CHAINLINK   // 8023
     uint256[] public s_randomWords; // For the FullFill Fct
-    address vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab; // Rinkeby coordinator 30 gwei Key Hash
-    bytes32 s_keyHash =
+    address constant vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab; // Rinkeby coordinator 30 gwei Key Hash
+    bytes32 constant s_keyHash =
         0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; // 30 gwei Key Hash
 
     bool public joinSessionFctOpen;
     uint256 public totalCreatedSessions;
-    uint256 timeOut = 24 hours;
+    uint256 constant timeOut = 24 hours;
     bytes32[] _words = [
         bytes32("hello"),
         bytes32("goodbye"),
@@ -101,7 +101,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     event RandomWordsTaken(uint256[] randomWords);
     event WordAdded();
     event HasPlayed(uint256 idSession, address player);
-    event joinSessionFctPaused(bool paused);
+    event JoinSessionFctPaused(bool paused);
 
     /* Constructor*/
     /// @dev go to your chainlink account to see your subcription ID
@@ -210,7 +210,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     /// @param word it is a bytes32
     /// @notice allows the owner to add words to the list for the game
     function addWord(bytes32 word) external onlyOwner {
-        require(isLowerCaseWord(word) == true, "Error, lowercase letters only"); // !! require non déployé
+        require(isLowerCaseWord(word), "Error, lowercase letters only"); // !! require non déployé
         _words.push(word);
         emit WordAdded();
     }
@@ -218,16 +218,16 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     /// @dev first make sure that the contract has been added to the consumers on your chainlik subscription management page
     /// @notice autorised players to use the joinSession Function
     function openJoinSessionFct() external onlyOwner {
-        require(joinSessionFctOpen == false, "Error, Already open");
+        require(!joinSessionFctOpen, "Error, Already open");
         joinSessionFctOpen = true;
-        emit joinSessionFctPaused(false);
+        emit JoinSessionFctPaused(false);
     }
 
     /// @notice unautorised players to use the joinSession Function
     function pausedJoinSessionFct() external onlyOwner {
-        require(joinSessionFctOpen == true, "Error, Already paused");
+        require(joinSessionFctOpen, "Error, Already paused");
         joinSessionFctOpen = false;
-        emit joinSessionFctPaused(true);
+        emit JoinSessionFctPaused(true);
     }
 
     /// @notice for create a new game session
@@ -257,7 +257,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         payable
         returns (uint256 requestId)
     {
-        require(joinSessionFctOpen == true, "Error, past RNGrequest not found");
+        require(joinSessionFctOpen, "Error, past RNGrequest not found");
         require(
             msg.sender != sessionPublic[idSession].playerOne,
             "Error, already in this session"
@@ -275,23 +275,24 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             "Error, session unreachable"
         );
 
+        sessionPublic[idSession].state = StateSession.InProgress;
         sessionPublic[idSession].playerTwo = payable(msg.sender);
         session[idSession].requestDate = block.timestamp;
-        sessionPublic[idSession].state = StateSession.InProgress;
+        sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
+        playerGames[msg.sender].games.push(idSession);
         joinSessionFctOpen = false;
-        requestId = COORDINATOR.requestRandomWords(
+        emit SessionJoined(idSession, msg.sender);
+       
+        reqIdPublic[requestId] = session[idSession].idSession; // same here with the public part for the front-end
+        reqId[requestId] = session[idSession].idSession; // here we mapping request id with a session
+         requestId = COORDINATOR.requestRandomWords(
             s_keyHash,
             s_subscriptionId,
             requestConfirmations,
             callbackGasLimit,
             numWords
         );
-        reqId[requestId] = session[idSession].idSession; // here we mapping request id with a session
-        reqIdPublic[requestId] = session[idSession].idSession; // same here with the public part for the front-end
         emit RNGRequested(requestId, idSession);
-        sessionPublic[idSession].mustPlay = sessionPublic[idSession].playerTwo;
-        playerGames[msg.sender].games.push(idSession);
-        emit SessionJoined(idSession, msg.sender);
     }
 
     /// @param requestId uint256 for identify the rng request
@@ -313,7 +314,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         joinSessionFctOpen = true;
 
         // here we remplaced the first letter
-        if (session[reqId[requestId]].firstLetterRemplaced == false) {
+        if (!session[reqId[requestId]].firstLetterRemplaced) {
             compareAndCopy(
                 session[reqId[requestId]].word,
                 session[reqId[requestId]].word[0],
@@ -332,7 +333,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         external
         onlyPlayer(idSession)
     {
-        require(isLetter(letter) == true, "Error, only lowercase letter");
+        require(isLetter(letter), "Error, only lowercase letter");
         require(
             sessionPublic[idSession].state == StateSession.InProgress,
             "Error, session not in progress"
@@ -358,7 +359,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             ) {
                 session[idSession].playerOneFoundWord = true;
                 // Draw
-                if (session[idSession].playerTwoFoundWord == true) {
+                if (session[idSession].playerTwoFoundWord) {
                     sessionPublic[idSession].state = StateSession.Draw;
                     balance[
                         sessionPublic[idSession].playerOne
@@ -368,7 +369,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
                     ] += sessionPublic[idSession].betSize;
                 }
                 // Player one Win
-                if (session[idSession].playerTwoFoundWord == false) {
+                if (!session[idSession].playerTwoFoundWord) {
                     sessionPublic[idSession].state = StateSession.PlayerOneWin;
                     balance[sessionPublic[idSession].playerOne] +=
                         sessionPublic[idSession].betSize *
@@ -377,8 +378,8 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
             }
             // Player Two Win: Player Two find the word and player not found it
             if (
-                session[idSession].playerTwoFoundWord == true &&
-                (session[idSession].playerOneFoundWord == false)
+                session[idSession].playerTwoFoundWord &&
+                !session[idSession].playerOneFoundWord
             ) {
                 sessionPublic[idSession].state = StateSession.PlayerTwoWin;
                 balance[sessionPublic[idSession].playerTwo] +=
@@ -417,7 +418,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         bytes1 maskBytes = 0xff;
         bytes32 mask = bytes32(maskBytes) >> (position * 8);
 
-        if (session[idSession].firstLetterRemplaced == false) {
+        if (!session[idSession].firstLetterRemplaced) {
             sessionPublic[idSession].playerOneGuess =
                 (~mask & sessionPublic[idSession].playerOneGuess) |
                 (bytes32(toInsert) >> (position * 8));
@@ -429,7 +430,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         if (
             sessionPublic[idSession].mustPlay ==
             sessionPublic[idSession].playerOne &&
-            session[idSession].firstLetterRemplaced == true
+            session[idSession].firstLetterRemplaced
         ) {
             sessionPublic[idSession].playerOneGuess =
                 (~mask & sessionPublic[idSession].playerOneGuess) |
@@ -438,7 +439,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         if (
             sessionPublic[idSession].mustPlay ==
             sessionPublic[idSession].playerTwo &&
-            session[idSession].firstLetterRemplaced == true
+            session[idSession].firstLetterRemplaced
         ) {
             sessionPublic[idSession].playerTwoGuess =
                 (~mask & sessionPublic[idSession].playerTwoGuess) |
@@ -506,7 +507,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     /// @notice check if is a letter
     function isLowerCaseWord(bytes32 word) private pure returns (bool) {
         for (uint8 i = 0; i < 32 && word[i] != 0; i++) {
-            if (isLetter(word[i]) == false) {
+            if (!isLetter(word[i])) {
                 return false;
             }
         }
