@@ -92,39 +92,39 @@ Reentrency pas possible grace au require, si la fonction s'exécute partiellemen
 Action: déplacé l'appelle de la fonction requestRandomWords() en fin de fonction, dans ce cas si la fonction est interrompue avant la fin aucun mot ne sera générer et apres 3h les joueurs pourront demander a ce que la partie soit annulé &&  "sessionPublic[idSession].state = StateSession.InProgress;" placé juste après les require.<br/>
 <br/>
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_5.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_5.PNG)<br/>
 Ignoré: un require revert la fonction  si nécéssaire <br/>
 <br/>
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_6.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_6.PNG)<br/>
 Ignoré: même en cas de manipulation c'est comparaison n'ont pas besoin d'une grande précisions<br/>
 <br/>
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_7.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_7.PNG)<br/>
 Action: suppression des égalités<br/>
 <br/>
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_8.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_8.PNG)<br/>
 Ignoré<br/>
 <br/>
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_9.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_9.PNG)<br/>
 Ignoré: require en fin de fonction qui vérifie l'exécution<br/>
 <br/>
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_10.PNG)>
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_10.PNG)<br/>
 Ignoré: pour les mixedCase (pas pertinent)<br/>
 Action: Event name modifié <br/>
 <br/>
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_11.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_11.PNG)<br/>
 Action: uint32 callbackGasLimit = 200000; ==> uint32 callbackGasLimit = 2 * (10**5);<br/>
 <br/>
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_12.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_12.PNG)<br/>
 Action: ajout de l'attribut constant<br/>
 <br/>
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_13.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureSlither_13.PNG)<br/>
 Action: dans MockPenduel.sol pour la fonction joinSession() passé de public a external<br/>
 <br/>
