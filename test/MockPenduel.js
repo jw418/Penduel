@@ -333,12 +333,12 @@ contract(`MockPenduel`, function (accounts) {
       await expect(openOrNot).to.equal(false, "is not false");
     });
 
-    it(`${testCounter++}: should emit an event joinSessionFctPaused(true)`, async function () {
+    it(`${testCounter++}: should emit an event JoinSessionFctPaused(true)`, async function () {
       await this.MockPenduelInstance.openJoinSessionFct({ from: owner });
       const paused = await this.MockPenduelInstance.pausedJoinSessionFct({
         from: owner,
       });
-      await expectEvent(paused, "joinSessionFctPaused", true);
+      await expectEvent(paused, "JoinSessionFctPaused", true);
     });
   });
 
@@ -363,12 +363,12 @@ contract(`MockPenduel`, function (accounts) {
       await expect(openOrNot).to.equal(true, "is not true");
     });
 
-    it(`${testCounter++}: should emit an event joinSessionFctPaused(false)`, async function () {
+    it(`${testCounter++}: should emit an event JoinSessionFctPaused(false)`, async function () {
       await this.MockPenduelInstance.pausedJoinSessionFct({ from: owner });
       const notPaused = await this.MockPenduelInstance.openJoinSessionFct({
         from: owner,
       });
-      await expectEvent(notPaused, "joinSessionFctPaused", false);
+      await expectEvent(notPaused, "JoinSessionFctPaused", false);
     });
   });
 
