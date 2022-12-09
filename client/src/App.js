@@ -144,7 +144,7 @@ class App extends Component {
                           <strong>Cancel the game</strong>
                         </Card.Header>
                         <Card.Body>
-                          <Button title="if no one has joined your party within 24 hours you can cancel the game" onClick={() => cancelGame(id)} variant="dark">
+                          <Button title="if no one has joined your party within 24 hours you can cancel the game" onClick={() => cancelGame(id)} variant="danger">
                             {" "}
                             Cancel{" "}
                           </Button>
@@ -179,7 +179,7 @@ class App extends Component {
                       <strong>Refunding: Request RNG Time Out</strong>
                     </Card.Header>
                     <Card.Body>
-                      <Button title="Usually the chainlink rng provides a random number quite quickly (about 3min). After 3 hours if no words could be drawn you can request a refund." onClick={() => rngNotFound(id)} variant="dark">
+                      <Button title="Usually the chainlink rng provides a random number quite quickly (about 3min). After 3 hours if no words could be drawn you can request a refund." onClick={() => rngNotFound(id)} variant="danger">
                         {" "}
                         Request{" "}
                       </Button>
@@ -237,7 +237,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x61", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               A
                             </Button>
@@ -246,7 +246,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x62", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               B
                             </Button>
@@ -255,7 +255,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x63", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               C
                             </Button>
@@ -264,7 +264,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x64", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               D
                             </Button>
@@ -273,7 +273,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x65", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               E
                             </Button>
@@ -282,7 +282,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x66", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               F
                             </Button>
@@ -291,7 +291,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x67", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               G
                             </Button>
@@ -300,7 +300,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x68", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               H
                             </Button>
@@ -309,7 +309,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x69", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               I
                             </Button>
@@ -318,7 +318,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x6a", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               J
                             </Button>
@@ -327,7 +327,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x6b", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               K
                             </Button>
@@ -336,7 +336,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x6c", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               L
                             </Button>
@@ -345,7 +345,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x6d", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               M
                             </Button>
@@ -354,7 +354,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x6e", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               N
                             </Button>
@@ -363,7 +363,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x6f", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               O
                             </Button>
@@ -372,7 +372,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x70", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               P
                             </Button>
@@ -381,7 +381,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x71", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               Q
                             </Button>
@@ -390,7 +390,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x72", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               R
                             </Button>
@@ -399,7 +399,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x73", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               S
                             </Button>
@@ -408,7 +408,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x74", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               T
                             </Button>
@@ -417,7 +417,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x75", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               U
                             </Button>
@@ -426,7 +426,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x76", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               V
                             </Button>
@@ -435,7 +435,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x77", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               W
                             </Button>
@@ -444,7 +444,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x78", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               X
                             </Button>
@@ -453,7 +453,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x79", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               Y
                             </Button>
@@ -462,7 +462,7 @@ class App extends Component {
                               onClick={() => {
                                 play("0x7a", id);
                               }}
-                              variant="dark"
+                              variant="outline-primary"
                             >
                               Z
                             </Button>
@@ -503,7 +503,7 @@ class App extends Component {
                           <Card.Body>
                             <Button title="If your opponent takes longer than 24 hours to play, you can request a TimeOut Victory."
                               onClick={() => requestWinTimeout(id)}
-                              variant="dark"
+                              variant="danger"
                             >
                               {" "}
                               Request{" "}
@@ -894,7 +894,7 @@ class App extends Component {
             <h2 className="text-center">Penduel</h2>
           </div>
           <div>
-            <Button title="Connected Account" variant="dark">{accounts}</Button>
+            <Button title="Connected Account" variant="secondary">{accounts}</Button>
           </div>
           <br></br>
         </div>
@@ -928,7 +928,7 @@ class App extends Component {
                             />
                           </Form.Group>
                           <br></br>
-                          <Button onClick={this.createSession} variant="dark">
+                          <Button onClick={this.createSession} variant="primary">
                             {" "}
                             Create{" "}
                           </Button>
@@ -981,7 +981,7 @@ class App extends Component {
                                   onClick={() => {
                                     this.joinSession(a[1], a[3]);
                                   }}
-                                  variant="dark"
+                                  variant="primary"
                                 >
                                   {" "}
                                   join{" "}
@@ -1007,7 +1007,7 @@ class App extends Component {
               <strong>In-Game Balance: {inGameBalance} wei</strong>
             </Card.Header>
             <Card.Body>
-              <Button onClick={this.withdraw} variant="dark">
+              <Button onClick={this.withdraw} variant="primary">
                 {" "}
                 withdraw{" "}
               </Button>
@@ -1029,7 +1029,7 @@ class App extends Component {
                   <Button
                     style={{ margin: "3px" }}
                     onClick={this.openJoinSessionFct}
-                    variant="dark"
+                    variant="warning"
                   >
                     {" "}
                     openJoinSessionFct(){" "}
@@ -1038,7 +1038,7 @@ class App extends Component {
                   <Button
                     style={{ margin: "6px" }}
                     onClick={this.pausedJoinSessionFct}
-                    variant="dark"
+                    variant="danger"
                   >
                     {" "}
                     pausedJoinSessionFct(){" "}
@@ -1066,7 +1066,7 @@ class App extends Component {
                         <Button
                           style={{ margin: "3px" }}
                           onClick={this.addWord}
-                          variant="dark"
+                          variant="outline-primary"
                         >
                           {" "}
                           Add{" "}
