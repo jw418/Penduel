@@ -20,9 +20,8 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
     uint32 constant numWords = 1; // Number of random number at each request.
     uint64 public s_subscriptionId; // Your subscription ID for CHAINLINK   // 8023
     uint256[] public s_randomWords; // For the FullFill Fct
-    address constant vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab; // Rinkeby coordinator 30 gwei Key Hash
-    bytes32 constant s_keyHash =
-        0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; // 30 gwei Key Hash
+    address constant public vrfCoordinator = 0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D; // Goerli coordinator
+    bytes32 constant public s_keyHash = 0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15; // 150 gwei Key Hash
 
     bool public joinSessionFctOpen;
     uint256 public totalCreatedSessions;
@@ -34,7 +33,14 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         bytes32("holliday"),
         bytes32("before"),
         bytes32("after"),
-        bytes32("special")
+        bytes32("restoration"),
+        bytes32("fashion"),
+        bytes32("dressing"),
+        bytes32("representative"),
+        bytes32("silence"),
+        bytes32("acceptable"),
+        bytes32("environmental"),
+        bytes32("photocopy")
     ];
 
     /* Mapping*/
@@ -283,15 +289,15 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
         joinSessionFctOpen = false;
         emit SessionJoined(idSession, msg.sender);
        
-        reqIdPublic[requestId] = session[idSession].idSession; // same here with the public part for the front-end
-        reqId[requestId] = session[idSession].idSession; // here we mapping request id with a session
-         requestId = COORDINATOR.requestRandomWords(
+        requestId = COORDINATOR.requestRandomWords(
             s_keyHash,
             s_subscriptionId,
             requestConfirmations,
             callbackGasLimit,
             numWords
         );
+        reqId[requestId] = session[idSession].idSession; // here we mapping request id with a session
+        reqIdPublic[requestId] = session[idSession].idSession; // same here with the public part for the front-end
         emit RNGRequested(requestId, idSession);
     }
 

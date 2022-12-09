@@ -5,7 +5,7 @@ require("dotenv").config();
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
   // to customize your Truffle configuration!
-  // contracts_build_directory: path.join(__dirname, "client/src/contracts"),  // commenté pour utilisé slither
+  contracts_build_directory: path.join(__dirname, "client/src/contracts"),  // commenté pour utilisé slither
   networks: {
     development: {
       host: "127.0.0.1",
@@ -27,7 +27,7 @@ module.exports = {
 
     // mainnet: {
     //   provider: function() {
-    //     return new HDWalletProvider(`${process.env.MNEMONIC}`, `https://mainnet.infura.io/v3/${process.env.INFURA_ID}`)
+    //     return new HDWalletProvider(`${process.env.MNEMONIC}`, `https://mainnet.infura.io/v3/${process.env.ALCHEMY_ID}`)
     //   },
     //   network_id: 1
     // },
@@ -36,7 +36,7 @@ module.exports = {
       provider: function () {
         return new HDWalletProvider(
           `${process.env.MNEMONIC}`,
-          `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`
+          `https://rinkeby.infura.io/v3/${process.env.ALCHEMY_ID}`
         );
       },
       network_id: 4,
@@ -45,10 +45,19 @@ module.exports = {
       provider: function () {
         return new HDWalletProvider(
           `${process.env.MNEMONIC}`,
-          `https://ropsten.infura.io/v3/${process.env.INFURA_ID}`
+          `https://ropsten.infura.io/v3/${process.env.ALCHEMY_ID}`
         );
       },
       network_id: 3,
+    },
+    goerli: {
+      provider: function () {
+        return new HDWalletProvider(
+          `${process.env.MNEMONIC}`,
+          `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_ID}`
+        );
+      },
+      network_id: 5,
     },
   },
 

@@ -4,10 +4,10 @@ Jeu du Pendu en Duel, créer une partie avec la mise souhaitée ou rejoignez une
 DAPP réalisé dans le cadre de la formation développeur blockchain d'Alyra.
 
 
-Adresse du contract: 0xAEe6F610C619629E2C42De7E4bD7d27Af215cbeC (rinkeby) <br/>
-EtherScan: https://rinkeby.etherscan.io/address/0xAEe6F610C619629E2C42De7E4bD7d27Af215cbeC <br/>
+Adresse du contract: 0xD1f5b4fB58D99c93d91376FC0E110c2078B840AE (Goerli) <br/>
+EtherScan: https://goerli.etherscan.io/address/0xD1f5b4fB58D99c93d91376FC0E110c2078B840AE <br/>
 Vidéo de démonstration: https://youtu.be/iz33uqRb9r4 <br/>
-Faucet: https://faucets.chain.link/rinkeby <br/>
+Faucet: https://goerlifaucet.com/ <br/>
 
 DAPP: https://hangsmans-versus-game.herokuapp.com/
 
