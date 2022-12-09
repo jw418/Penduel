@@ -39,7 +39,7 @@ Pour voir le front en local:
  npm run start
 ```
 Sinon directement sur: https://floral-darkness-8082.on.fleek.co/ <br/>
-Assurez-vous d'être sur le réseau de test Rinkeby.
+Assurez-vous d'être sur le réseau de test Goerli.
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureRinkeby.PNG)
 
