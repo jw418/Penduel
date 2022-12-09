@@ -9,7 +9,7 @@ EtherScan: https://goerli.etherscan.io/address/0xD1f5b4fB58D99c93d91376FC0E110c2
 Vidéo de démonstration: https://youtu.be/iz33uqRb9r4 <br/>
 Faucet: https://goerlifaucet.com/ <br/>
 
-DAPP: https://hangsmans-versus-game.herokuapp.com/
+DAPP: https://floral-darkness-8082.on.fleek.co/
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureFront.PNG)
 
@@ -38,7 +38,7 @@ Pour voir le front en local:
  cd client
  npm run start
 ```
-Sinon directement sur: https://hangsmans-versus-game.herokuapp.com// <br/>
+Sinon directement sur: https://floral-darkness-8082.on.fleek.co/ <br/>
 Assurez-vous d'être sur le réseau de test Rinkeby.
 
 ![](https://github.com/jw418/Penduel/blob/main/img/CaptureRinkeby.PNG)
