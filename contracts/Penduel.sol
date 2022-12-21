@@ -124,6 +124,7 @@ contract Penduel is VRFConsumerBaseV2, Ownable {
 
     /// @notice a withdraw function for players
     function playerWithdraw() external {
+        require(balance[msg.sender]>0, "your balance is 0");  //this line is not deployed
         uint256 toSend = balance[msg.sender];
         balance[msg.sender] = 0;
         (bool success, ) = msg.sender.call{value: toSend}("");

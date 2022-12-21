@@ -8,6 +8,15 @@ import Table from "react-bootstrap/Table";
 import Penduel from "./contracts/Penduel.json";
 import getWeb3 from "./getWeb3";
 import "./App.css";
+import logoApp from "./image/hangman-vs-blck.png";
+import logoMetamask from "./image/MetaMask_Fox.png";
+import timer from "./image/timer.png";
+import plus from "./image/plus.png";
+
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import NavDropdown from "react-bootstrap/NavDropdown";
 
 class App extends Component {
   state = {
@@ -30,7 +39,7 @@ class App extends Component {
 
       // Récupérer l’instance du smart contract “Penduel” avec web3 et les informations du déploiement du fichier (client/src/contracts/Whitelist.json)
       const networkId = await web3.eth.net.getId();
-      const deployedNetwork = Penduel.networks[networkId];
+      const deployedNetwork = Penduel.networks[5];
 
       const instance = new web3.eth.Contract(
         Penduel.abi,
@@ -128,12 +137,16 @@ class App extends Component {
           toRender = (
             <>
               {" "}
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Card>
+              <div
+                className="game"
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <Card className="game--card">
                   <Card.Header>
                     Game ID: {id} Bet Size: {betSize} Wei Created By: You
                   </Card.Header>
-                  <Card.Body>
+                  <Card.Body className="card-body">
+                    <img className="timer-img" src={timer} />
                     <h5>Await for a Second Player</h5>
                     <div
                       align="center"
@@ -144,7 +157,11 @@ class App extends Component {
                           <strong>Cancel the game</strong>
                         </Card.Header>
                         <Card.Body>
-                          <Button title="if no one has joined your party within 24 hours you can cancel the game" onClick={() => cancelGame(id)} variant="danger">
+                          <Button
+                            title="if no one has joined your party within 24 hours you can cancel the game"
+                            onClick={() => cancelGame(id)}
+                            variant="outline-danger"
+                          >
                             {" "}
                             Cancel{" "}
                           </Button>
@@ -173,13 +190,20 @@ class App extends Component {
           if (wordLength == 0) {
             renderRNGButton = (
               <>
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <Card style={{ width: "20rem" }}>
+                <div
+                  className="game"
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Card className="game--card" style={{ width: "20rem" }}>
                     <Card.Header>
                       <strong>Refunding: Request RNG Time Out</strong>
                     </Card.Header>
                     <Card.Body>
-                      <Button title="Usually the chainlink rng provides a random number quite quickly (about 3min). After 3 hours if no words could be drawn you can request a refund." onClick={() => rngNotFound(id)} variant="danger">
+                      <Button
+                        title="Usually the chainlink rng provides a random number quite quickly (about 3min). After 3 hours if no words could be drawn you can request a refund."
+                        onClick={() => rngNotFound(id)}
+                        variant="outline-danger"
+                      >
                         {" "}
                         Request{" "}
                       </Button>
@@ -210,18 +234,24 @@ class App extends Component {
             toRender = (
               <>
                 {" "}
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <Card>
+                <div
+                  className="game"
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Card className="game--card">
                     <Card.Header>
-                      Game ID: {id} Bet Size: {betSize} Wei Opponent: {opponent}
+                      Game ID: {id} Bet Size: {betSize} Wei Opponent:{" "}
+                      {`${opponent.toString().slice(0, -37)}...${opponent
+                        .toString()
+                        .slice(-3)}`}
                     </Card.Header>
-                    <Card.Body>
+                    <Card.Body className="card-body">
                       <p>{playerTurn}</p>
                       <p>
                         your guess: <h1>{guessString}</h1>
                       </p>
                       <p>Game: In Progress</p>
-                      <br></br>
+
                       <p>{renderRNGButton}</p>
 
                       <div
@@ -478,10 +508,16 @@ class App extends Component {
             playerTurn = "Await your turn";
             toRender = (
               <>
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <Card>
+                <div
+                  className="game"
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Card className="game--card">
                     <Card.Header>
-                      Game ID: {id} Bet Size: {betSize} Wei Opponent: {opponent}
+                      Game ID: {id} Bet Size: {betSize} Wei Opponent:{" "}
+                      {`${opponent.toString().slice(0, -37)}...${opponent
+                        .toString()
+                        .slice(-3)}`}
                     </Card.Header>
                     <Card.Body>
                       <p>{playerTurn}</p>
@@ -491,7 +527,6 @@ class App extends Component {
                       <p>Game: In Progress</p>
                       <p>{renderRNGButton}</p>
 
-                      <br></br>
                       <div
                         align="center"
                         style={{ display: "flex", justifyContent: "center" }}
@@ -501,9 +536,10 @@ class App extends Component {
                             <strong>Request Victory: Oppent TimeOut</strong>
                           </Card.Header>
                           <Card.Body>
-                            <Button title="If your opponent takes longer than 24 hours to play, you can request a TimeOut Victory."
+                            <Button
+                              title="If your opponent takes longer than 24 hours to play, you can request a TimeOut Victory."
                               onClick={() => requestWinTimeout(id)}
-                              variant="danger"
+                              variant="outline-danger"
                             >
                               {" "}
                               Request{" "}
@@ -551,10 +587,16 @@ class App extends Component {
 
           let toRender = (
             <>
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Card>
+              <div
+                className="game"
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <Card className="game--card">
                   <Card.Header>
-                    Game ID: {id} Bet Size: {betSize} Wei VS: {opponent}
+                    Game ID: {id} Bet Size: {betSize} Wei VS:{" "}
+                    {`${opponent.toString().slice(0, -37)}...${opponent
+                      .toString()
+                      .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
                     <p>
@@ -600,10 +642,16 @@ class App extends Component {
 
           let toRender = (
             <>
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Card>
+              <div
+                className="game"
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <Card className="game--card">
                   <Card.Header>
-                    Game ID: {id} Bet Size: {betSize} Wei VS: {opponent}
+                    Game ID: {id} Bet Size: {betSize} Wei VS:{" "}
+                    {`${opponent.toString().slice(0, -37)}...${opponent
+                      .toString()
+                      .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
                     <p>
@@ -646,10 +694,16 @@ class App extends Component {
 
           let toRender = (
             <>
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Card>
+              <div
+                className="game"
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <Card className="game--card">
                   <Card.Header>
-                    Game ID: {id} Bet Size: {betSize} Wei VS: {opponent}
+                    Game ID: {id} Bet Size: {betSize} Wei VS:{" "}
+                    {`${opponent.toString().slice(0, -37)}...${opponent
+                      .toString()
+                      .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
                     <p>
@@ -672,8 +726,11 @@ class App extends Component {
           let toRender = (
             <>
               {" "}
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Card>
+              <div
+                className="game"
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <Card className="game--card">
                   <Card.Header>
                     Game ID: {id} Bet Size: {betSize} Wei
                   </Card.Header>
@@ -719,10 +776,16 @@ class App extends Component {
           let toRender = (
             <>
               {" "}
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Card>
+              <div
+                className="game"
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <Card className="game--card">
                   <Card.Header>
-                    Game ID: {id} Bet Size: {betSize} Wei VS: {opponent}
+                    Game ID: {id} Bet Size: {betSize} Wei VS:{" "}
+                    {`${opponent.toString().slice(0, -37)}...${opponent
+                      .toString()
+                      .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
                     <p>
@@ -768,10 +831,16 @@ class App extends Component {
 
           let toRender = (
             <>
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Card>
+              <div
+                className="game"
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <Card className="game--card">
                   <Card.Header>
-                    Game ID: {id} Bet Size: {betSize} Wei VS: {opponent}
+                    Game ID: {id} Bet Size: {betSize} Wei VS:{" "}
+                    {`${opponent.toString().slice(0, -37)}...${opponent
+                      .toString()
+                      .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
                     <p>
@@ -881,208 +950,232 @@ class App extends Component {
     }
 
     return (
-      <div className="App">
-        <div
-          style={{
-            display: "inline­-flex",
-            margin: "7px",
-            justifyContent: "spaceBetween",
-          }}
-        >
-          <div></div>
-          <div>
-            <h2 className="text-center">Penduel</h2>
-          </div>
-          <div>
-            <Button title="Connected Account" variant="secondary">{accounts}</Button>
-          </div>
-          <br></br>
-        </div>
-        <hr></hr>
+      <div className="app">
+        <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark">
+          <Container fluid>
+            <Navbar.Brand href="#home">Penduel</Navbar.Brand>
+            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+            <Navbar.Collapse id="responsive-navbar-nav">
+              <Nav className="me-auto">
+                <Nav.Link href="#join">Join</Nav.Link>
+                <Nav.Link href="#session">Your sessions</Nav.Link>
+                <Nav.Link href="#">
+                  In-Game Balance: {inGameBalance} wei{" "}
+                </Nav.Link>
 
-        <br></br>
+                <Button
+                  className="withdraw-button"
+                  onClick={this.withdraw}
+                  variant="secondary"
+                  size="sm"
+                >
+                  {" "}
+                  withdraw{" "}
+                </Button>
 
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <Card style={{ display: "flex", flexDirection: "column" }}>
-            <Card.Header>
-              <strong>Your sessions</strong>
-            </Card.Header>
-            <Card.Body>
-              <tbody>
-                <tr>
-                  <td>
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <Card style={{ width: "23rem", alignContent: "center" }}>
-                        <Card.Header>
-                          <strong>Create New Game</strong>
-                        </Card.Header>
-                        <Card.Body>
-                          <Form.Group id="createSession">
-                            <Form.Control
-                              type="number"
-                              id="betSize"
-                              placeholder="Bet Size in Wei"
-                              ref={(input) => {
-                                this.bet = input;
-                              }}
-                            />
-                          </Form.Group>
-                          <br></br>
-                          <Button onClick={this.createSession} variant="primary">
-                            {" "}
-                            Create{" "}
-                          </Button>
-                        </Card.Body>
-                      </Card>
-                    </div>
-                  </td>
-                </tr>
-                <br></br>
+                {accounts[0] == owner ? (
+                  <>
+                    <Nav.Link href="#admin">Admin</Nav.Link>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </Nav>
+              <Nav>
+                <Button
+                  className="header--connect"
+                  title="Connected Account"
+                  variant="secondary"
+                >
+                  <img src={logoMetamask} />
+                  <p>
+                    {" "}
+                    {accounts != undefined
+                      ? `${accounts.toString().slice(0, -37)}...${accounts
+                          .toString()
+                          .slice(-3)}`
+                      : "Connect"}
+                  </p>
+                </Button>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
 
-                {arrayGames !== null &&
-                  arrayGames.map((b) => (
-                    <div>
-                      {b[2]}
-                      <br></br>
-                    </div>
-                  ))}
-              </tbody>
-            </Card.Body>
-          </Card>
-        </div>
-
-        <br></br>
-
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <Card style={{ width: "50rem" }}>
-            <Card.Header>
-              <strong>Join</strong>
-            </Card.Header>
-            <Card.Body>
-              <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <Table striped bordered hover>
-                    <thead>
-                      <tr>
-                        <th>Game ID // Bet Size // Created By</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {reachebleGames !== null &&
-                        reachebleGames.map((a) => (
-                          <>
-                            <tr>
-                              <td>
-                                Game ID: {a[1]} Bet Size: {a[3]} wei Created By:{" "}
-                                {a[5]}
-                                <br></br>
-                                <br></br>
-                                <Button
-                                  onClick={() => {
-                                    this.joinSession(a[1], a[3]);
-                                  }}
-                                  variant="primary"
-                                >
-                                  {" "}
-                                  join{" "}
-                                </Button>
-                              </td>
-                            </tr>
-                            <br></br>
-                          </>
-                        ))}
-                    </tbody>
-                  </Table>
-                </ListGroup.Item>
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </div>
-
-        <br></br>
-
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <Card style={{ width: "50rem" }}>
-            <Card.Header>
-              <strong>In-Game Balance: {inGameBalance} wei</strong>
-            </Card.Header>
-            <Card.Body>
-              <Button onClick={this.withdraw} variant="primary">
-                {" "}
-                withdraw{" "}
-              </Button>
-            </Card.Body>
-          </Card>
-        </div>
-
-        <br></br>
-
-        {accounts[0] == owner ? (
-          <>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <Card style={{ width: "50rem" }}>
+        <div className="body">
+          <div id="join" className="body-first-section">
+            <div
+              className="join"
+              style={{ display: "flex", justifyContent: "center" }}
+            >
+              <Card className="join-card">
                 <Card.Header>
-                  <strong>(Only Admin)</strong>{" "}
+                  <strong>Join</strong>
                 </Card.Header>
                 <Card.Body>
-                  <br></br>
-                  <Button
-                    style={{ margin: "3px" }}
-                    onClick={this.openJoinSessionFct}
-                    variant="warning"
-                  >
-                    {" "}
-                    openJoinSessionFct(){" "}
-                  </Button>
-                  <br></br>
-                  <Button
-                    style={{ margin: "6px" }}
-                    onClick={this.pausedJoinSessionFct}
-                    variant="danger"
-                  >
-                    {" "}
-                    pausedJoinSessionFct(){" "}
-                  </Button>
-                  <br></br>
+                  <ListGroup variant="flush">
+                    <ListGroup.Item>
+                      <Table striped bordered hover>
+                        <thead>
+                          <tr>
+                            <th>Game ID // Bet Size // Created By</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {reachebleGames !== null &&
+                            reachebleGames.map((a) => (
+                              <>
+                                <tr>
+                                  <td className="tbl-line">
+                                    <p>Game ID: {a[1]}</p>
+                                    <p>Bet Size: {a[3]} wei</p>
+                                    <p>
+                                      Created By:{" "}
+                                      {`${a[5]
+                                        .toString()
+                                        .slice(0, -37)}...${a[5]
+                                        .toString()
+                                        .slice(-3)}`}
+                                    </p>
+                                    <Button
+                                      className="join-btn"
+                                      onClick={() => {
+                                        this.joinSession(a[1], a[3]);
+                                      }}
+                                      variant="primary"
+                                    >
+                                      {" "}
+                                      join{" "}
+                                    </Button>
+                                  </td>
+                                </tr>
+                              </>
+                            ))}
+                        </tbody>
+                      </Table>
+                    </ListGroup.Item>
+                  </ListGroup>
+                </Card.Body>
+              </Card>
+            </div>
+          </div>
 
-                  <div style={{ display: "flex", justifyContent: "center" }}>
-                    <Card style={{ width: "30rem" }}>
+          <div
+            id="session"
+            className="your-session"
+            style={{ display: "flex", justifyContent: "center" }}
+          >
+            <Card className="card-section">
+              <Card.Header>
+                <strong>Your sessions</strong>
+              </Card.Header>
+              <Card.Body className="body-sessions">
+                <tbody className="tbl">
+                  <div
+                    className="create-session"
+                    style={{ display: "flex", justifyContent: "center" }}
+                  >
+                    <Card
+                      className="card-new"
+                      style={{ alignContent: "center" }}
+                    >
                       <Card.Header>
-                        <strong>Add Word</strong>
+                        <strong>Create New Game</strong>
                       </Card.Header>
-                      <Card.Body>
-                        <Form.Group id="addword">
-                          <br></br>
+                      <Card.Body className="create-session-body">
+                        <img className="new--img" src={plus} />
+                        <Form.Group id="createSession">
                           <Form.Control
-                            type="text"
-                            id="word"
-                            placeholder="word"
+                            type="number"
+                            className="betsize"
+                            placeholder="Bet Size in Wei"
                             ref={(input) => {
-                              this.string = input;
+                              this.bet = input;
                             }}
                           />
                         </Form.Group>
-
-                        <Button
-                          style={{ margin: "3px" }}
-                          onClick={this.addWord}
-                          variant="outline-primary"
-                        >
+                        <Button onClick={this.createSession} variant="primary">
                           {" "}
-                          Add{" "}
+                          Create{" "}
                         </Button>
                       </Card.Body>
                     </Card>
                   </div>
-                  <br></br>
-                </Card.Body>
-              </Card>
-            </div>
-          </>
-        ) : (
-          <></>
-        )}
-        <br></br>
+                  {arrayGames !== null &&
+                    arrayGames.map((b) => (
+                      <div className="tbl-game">{b[2]}</div>
+                    ))}
+                </tbody>
+              </Card.Body>
+            </Card>
+          </div>
+
+          {accounts[0] == owner ? (
+            <>
+              <div
+                id="admin"
+                className="admin"
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <Card>
+                  <Card.Header>
+                    <strong>(Only Admin)</strong>{" "}
+                  </Card.Header>
+                  <Card.Body>
+                    <Button
+                      style={{ margin: "3px" }}
+                      onClick={this.openJoinSessionFct}
+                      variant="warning"
+                    >
+                      {" "}
+                      openJoinSessionFct(){" "}
+                    </Button>
+
+                    <Button
+                      style={{ margin: "6px" }}
+                      onClick={this.pausedJoinSessionFct}
+                      variant="danger"
+                    >
+                      {" "}
+                      pausedJoinSessionFct(){" "}
+                    </Button>
+
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                      <Card style={{ width: "30rem" }}>
+                        <Card.Header>
+                          <strong>Add Word</strong>
+                        </Card.Header>
+                        <Card.Body>
+                          <Form.Group id="addword">
+                            <Form.Control
+                              type="text"
+                              id="word"
+                              placeholder="word"
+                              ref={(input) => {
+                                this.string = input;
+                              }}
+                            />
+                          </Form.Group>
+
+                          <Button
+                            style={{ margin: "3px" }}
+                            onClick={this.addWord}
+                            variant="outline-primary"
+                          >
+                            {" "}
+                            Add{" "}
+                          </Button>
+                        </Card.Body>
+                      </Card>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
     );
   }
