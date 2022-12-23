@@ -52,7 +52,7 @@ class App extends Component {
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
-        `Non-Ethereum browser detected. Can you please try to install MetaMask before starting.`
+        `Non-Ethereum browser detected. Can you please try to install MetaMask before starting and connect to the Goerli network.`
       );
       console.error(error);
     }
@@ -946,7 +946,45 @@ class App extends Component {
       this.state;
 
     if (!this.state.web3) {
-      return <div>Loading Web3, accounts, and contract...</div>;
+      return( <div>
+        <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark">
+          <Container fluid>
+            <Navbar.Brand href="https://floral-darkness-8082.on.fleek.co/">Penduel</Navbar.Brand>
+            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+            <Navbar.Collapse id="responsive-navbar-nav">
+              <Nav className="me-auto">
+                <Nav.Link href="#">Join</Nav.Link>
+                <Nav.Link href="#">Your sessions</Nav.Link>
+                <Nav.Link href="#">In-Game Balance: 0 wei</Nav.Link>
+
+                <Button
+                  className="withdraw-button"                  
+                  variant="secondary"
+                  size="sm"
+                >
+                  {" "}
+                  withdraw{" "}
+                </Button>                
+              </Nav>
+              <Nav>
+              <Nav.Link href="https://floral-darkness-8082.on.fleek.co/">
+                <Button
+                  className="header--connect"
+                  title="Connected Account"
+                  variant="secondary"
+                >
+                  <img src={logoMetamask} />
+                  <p>
+                  Connect
+                  </p>
+                </Button>
+                </Nav.Link>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
+      <div>Loading Web3, accounts, and contract...</div>
+      </div>)
     }
 
     return (
