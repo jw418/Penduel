@@ -12,15 +12,18 @@ import logoApp from "./image/hangman-vs-blck.png";
 import logoMetamask from "./image/MetaMask_Fox.png";
 import timer from "./image/timer.png";
 import plus from "./image/plus.png";
+import vsLogo from "./image/hangman-vs-blue.png";
 
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 
+
 class App extends Component {
   state = {
     web3: null,
+    network: null,
     accounts: null,
     contract: null,
     playerGames: null,
@@ -38,7 +41,25 @@ class App extends Component {
       const accounts = await web3.eth.getAccounts();
 
       // Récupérer l’instance du smart contract “Penduel” avec web3 et les informations du déploiement du fichier (client/src/contracts/Whitelist.json)
+      const NETWORKS = {
+        1: "Ethereum Mainnet(!DAPP on Goerli)",
+        3: "Ropsten Testnet(!DAPP on Goerli)",
+        4: "Rinkeby Testnet(!DAPP on Goerli)",
+        5: "Goerli Testnet",
+        42: "Kovan Testnet(!DAPP on Goerli)",
+        1337: "Ganache",
+      };
       const networkId = await web3.eth.net.getId();
+
+      const getCurrentNetwork = (chainId) => {
+        return NETWORKS[chainId];
+      };
+    
+      const getNetwork =  () => {
+        const network = getCurrentNetwork(networkId)
+        this.setState({network: network})
+      }
+      getNetwork()
       const deployedNetwork = Penduel.networks[5];
 
       const instance = new web3.eth.Contract(
@@ -52,7 +73,7 @@ class App extends Component {
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
-        `Non-Ethereum browser detected. Can you please try to install MetaMask before starting and connect to the Goerli network.`
+        `Non-Ethereum browser detected. Can you please try to install MetaMask before starting and connect to the Goerli Testnet network.`
       );
       console.error(error);
     }
@@ -247,8 +268,9 @@ class App extends Component {
                     </Card.Header>
                     <Card.Body className="card-body">
                       <p>{playerTurn}</p>
+                      <p>your guess: </p>
                       <p>
-                        your guess: <h1>{guessString}</h1>
+                        <strong className="guess">{guessString}</strong>
                       </p>
                       <p>Game: In Progress</p>
 
@@ -521,8 +543,9 @@ class App extends Component {
                     </Card.Header>
                     <Card.Body>
                       <p>{playerTurn}</p>
+                      <p>your guess: </p>
                       <p>
-                        your guess: <h1>{guessString}</h1>
+                        <strong className="guess">{guessString}</strong>
                       </p>
                       <p>Game: In Progress</p>
                       <p>{renderRNGButton}</p>
@@ -599,8 +622,9 @@ class App extends Component {
                       .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
+                    <p>your guess: </p>
                     <p>
-                      your guess: <h1>{guessString}</h1>
+                      <strong className="guess">{guessString}</strong>
                     </p>
                     <h5>{textEndgame}</h5>
                   </Card.Body>
@@ -654,8 +678,9 @@ class App extends Component {
                       .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
+                    <p>your guess: </p>
                     <p>
-                      your guess: <h1>{guessString}</h1>
+                      <strong className="guess">{guessString}</strong>
                     </p>
                     <h5>{textEndgame}</h5>
                   </Card.Body>
@@ -706,8 +731,9 @@ class App extends Component {
                       .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
+                    <p>your guess: </p>
                     <p>
-                      your guess: <h1>{guessString}</h1>
+                      <strong className="guess">{guessString}</strong>
                     </p>
                     <h5>{textEndgame}</h5>
                   </Card.Body>
@@ -788,8 +814,9 @@ class App extends Component {
                       .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
+                    <p>your guess: </p>
                     <p>
-                      your guess: <h1>{guessString}</h1>
+                      <strong className="guess">{guessString}</strong>
                     </p>
                     <h5>{textEndgame}</h5>
                   </Card.Body>
@@ -843,8 +870,9 @@ class App extends Component {
                       .slice(-3)}`}
                   </Card.Header>
                   <Card.Body>
+                    <p>your guess: </p>
                     <p>
-                      your guess: <h1>{guessString}</h1>
+                      <strong className="guess">{guessString}</strong>
                     </p>
                     <h5>{textEndgame}</h5>
                   </Card.Body>
@@ -942,49 +970,51 @@ class App extends Component {
 
   render() {
     // on recupere les state
-    const { arrayGames, reachebleGames, accounts, inGameBalance, owner } =
+    const { arrayGames, reachebleGames, accounts, inGameBalance, owner, network } =
       this.state;
 
     if (!this.state.web3) {
-      return( <div>
-        <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark">
-          <Container fluid>
-            <Navbar.Brand href="https://floral-darkness-8082.on.fleek.co/">Penduel</Navbar.Brand>
-            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-            <Navbar.Collapse id="responsive-navbar-nav">
-              <Nav className="me-auto">
-                <Nav.Link href="#">Join</Nav.Link>
-                <Nav.Link href="#">Your sessions</Nav.Link>
-                <Nav.Link href="#">In-Game Balance: 0 wei</Nav.Link>
+      return (
+        <div>
+          <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark">
+            <Container fluid>
+              <Navbar.Brand href="https://floral-darkness-8082.on.fleek.co/">
+                Penduel
+              </Navbar.Brand>
+              <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+              <Navbar.Collapse id="responsive-navbar-nav">
+                <Nav className="me-auto">
+                  <Nav.Link href="#">Join</Nav.Link>
+                  <Nav.Link href="#">Your sessions</Nav.Link>
+                  <Nav.Link href="#">In-Game Balance: 0 wei</Nav.Link>
 
-                <Button
-                  className="withdraw-button"                  
-                  variant="secondary"
-                  size="sm"
-                >
-                  {" "}
-                  withdraw{" "}
-                </Button>                
-              </Nav>
-              <Nav>
-              <Nav.Link href="https://floral-darkness-8082.on.fleek.co/">
-                <Button
-                  className="header--connect"
-                  title="Connected Account"
-                  variant="secondary"
-                >
-                  <img src={logoMetamask} />
-                  <p>
-                  Connect
-                  </p>
-                </Button>
-                </Nav.Link>
-              </Nav>
-            </Navbar.Collapse>
-          </Container>
-        </Navbar>
-      <div>Loading Web3, accounts, and contract...</div>
-      </div>)
+                  <Button
+                    className="withdraw-button"
+                    variant="secondary"
+                    size="sm"
+                  >
+                    {" "}
+                    withdraw{" "}
+                  </Button>
+                </Nav>
+                <Nav>
+                  <Nav.Link href="https://floral-darkness-8082.on.fleek.co/">
+                    <Button
+                      className="header--connect"
+                      title="Connected Account"
+                      variant="secondary"
+                    >
+                      <img src={logoMetamask} />
+                      <p>Connect</p>
+                    </Button>
+                  </Nav.Link>
+                </Nav>
+              </Navbar.Collapse>
+            </Container>
+          </Navbar>
+          <div>Loading Web3, accounts, and contract...</div>
+        </div>
+      );
     }
 
     return (
@@ -997,7 +1027,7 @@ class App extends Component {
               <Nav className="me-auto">
                 <Nav.Link href="#join">Join</Nav.Link>
                 <Nav.Link href="#session">Your sessions</Nav.Link>
-                <Nav.Link href="#">
+                <Nav.Link href="" disabled>
                   In-Game Balance: {inGameBalance} wei{" "}
                 </Nav.Link>
 
@@ -1010,10 +1040,11 @@ class App extends Component {
                   {" "}
                   withdraw{" "}
                 </Button>
+                <Nav.Link href="" disabled><p className="network">{network}</p></Nav.Link>
 
                 {accounts[0] == owner ? (
                   <>
-                    <Nav.Link href="#admin">Admin</Nav.Link>
+                    <Nav.Link href="#admin">## Admin ##</Nav.Link>
                   </>
                 ) : (
                   <></>
@@ -1039,8 +1070,12 @@ class App extends Component {
             </Navbar.Collapse>
           </Container>
         </Navbar>
-
+                          <p className="prod-warning">For demonstration purposes only(Not use in production!!)</p>
         <div className="body">
+          <div className="body-home">
+            <p className="home--text">Welcome to Penduel, a hangman game in Versus. The first player to find the right word wins. To play, join a game already created by another player or create your own game with the stake of your choice. The RNG is found via Chainlink VRFv2. Hosted on Fleek.</p>
+          <img className="body-home--img" src={vsLogo} alt=""/>
+          </div>
           <div id="join" className="body-first-section">
             <div
               className="join"
