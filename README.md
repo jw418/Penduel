@@ -11,7 +11,7 @@ Faucet: https://goerlifaucet.com/ <br/>
 
 DAPP: https://floral-darkness-8082.on.fleek.co/
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureFront.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/hangmanScreenshot.PNG)
 
 
 ## Installation 🛠️
