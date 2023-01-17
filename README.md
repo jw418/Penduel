@@ -41,7 +41,7 @@ Pour voir le front en local:
 Sinon directement sur: https://floral-darkness-8082.on.fleek.co/ <br/>
 Assurez-vous d'être sur le réseau de test Goerli.
 
-![](https://github.com/jw418/Penduel/blob/main/img/CaptureRinkeby.PNG)
+![](https://github.com/jw418/Penduel/blob/main/img/CaptureGoerli.PNG)
 
 
 
